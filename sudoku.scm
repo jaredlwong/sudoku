@@ -121,8 +121,10 @@
 
 ;(sudoku-solve sudoku)
 (define (sudoku-print sudoku)
-  (let ((l (vector->list (vector-map vector->list sudoku))))
-    (map (lambda (row) (apply string-append (map number->string row))) l)))
+  (map (lambda (row)
+	 (string-append row "\n"))
+       (let ((l (vector->list (vector-map vector->list sudoku))))
+	 (map (lambda (row) (apply string-append (map number->string row))) l))))
 
-(display (sudoku-print sudoku))
-(display (sudoku-print (sudoku-solve sudoku)))
+;(map display (sudoku-print sudoku))
+(map display (sudoku-print (sudoku-solve sudoku)))
