@@ -1,5 +1,6 @@
 import qualified Data.List
 import qualified Data.Char
+import qualified Data.Maybe
 
 -- putStrLn $ sudokuPrint $ Data.Maybe.fromJust $ solveSudoku  sudoku
 
@@ -87,3 +88,5 @@ solveSudoku sudoku =
 
 sudokuPrint :: Sudoku -> [Char]
 sudokuPrint sudoku = concat . concat $ Data.List.intersperse ["\n"] $ concat $ Data.List.intersperse [["-----------"]] $ splitEvery 3 $ map (Data.List.intersperse "|") $ splitEvery 3 $ splitEvery 3 $ map Data.Char.intToDigit sudoku
+
+main = do putStrLn $ sudokuPrint $ Data.Maybe.fromJust $ solveSudoku sudoku
