@@ -119,6 +119,28 @@
 		((sudoku-complete sudoku) sudoku)
 		(else (lp (append rest (sudoku-gen-next sudoku)))))))))
 
+;;; find first occurence in lst where predicate is true for an element
+;;; of lst applied to func
+(define (first-occurrence predicate func lst)
+  (let ((cur (func (car lst)))
+	(rest (cdr lst)))
+    (if (predicate cur)
+	cur
+	(if (null? rest)
+	    #f
+	    (first-occurrence func predicate rest)))))
+
+(define (identity x)
+  x)
+
+(define (sudoku-solve-recursive sudoku)
+  (cond ((not (sudoku-possible sudoku)) #f)
+	((sudoku-complete sudoku) sudoku)
+	;; find first solution that isn't #f
+	(else (first-occurrence identity 
+				sudoku-solve-recursive
+				(sudoku-gen-next sudoku)))))
+
 ;(sudoku-solve sudoku)
 (define (sudoku-print sudoku)
   (map (lambda (row)
@@ -127,4 +149,5 @@
 	 (map (lambda (row) (apply string-append (map number->string row))) l))))
 
 ;(map display (sudoku-print sudoku))
-(map display (sudoku-print (sudoku-solve sudoku)))
+;(map display (sudoku-print (sudoku-solve sudoku)))
+(map display (sudoku-print (sudoku-solve-recursive sudoku)))
