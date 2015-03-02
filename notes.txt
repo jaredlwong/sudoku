@@ -1,0 +1,140 @@
+let is global in interpreter
+let is local in file
+squrePlusTwo x = y * y
+	where y = x + 2
+
+isZero 0 = True
+isZero x = False
+
+isZero x = False
+isZero 0 = True
+everything = False
+
+haskell tries pattern matching in order
+
+g = (\x -> x * x)
+backslash \ = lambda
+
+:t = 1
+1:: Num a => a
+:t = True
+True : Bool
+:t [1,2,4]
+[1,2,4] :: Num t => [t]
+:t length
+length :: [a] => Int
+
+:t length [1,2,4]
+length [1,2,3]::intj
+
+=> = as long as
+-> = function
+
+data Point = P Float Float
+
+:r = recompile, reload, reinterpet
+
+data IntWithInfininth = I Int | Infinity deriving Show
+
+myAd (Infinity) y = Infinity
+mAdd x (Infinity) = Infinityo
+
+what is pipe deriving Show
+what are parentheses
+
+deriving Show
+deriving Read
+deriving = Show, Read, implements, type classes, automatically come up with the instance
+deriving instance (Show, Eq)
+
+data List a = Nil | Cons a (List a)
+	deriving (Eq, Show)
+
+let mySweekList = Cons 4 (Cons 5(Nil))
+let mySourList = (L) 4 ((L) 5[])
+
+mySweetlist, MySoutList, MyBitterList, and mylist == all same type = haskell list
+
+mySum [] = 0
+mySum (x : xs) = x + sum xs
+
+applyTwice f x = f (f x)
+applyTiwce squre 2
+
+pplyTwice (\x -> x(x) 2
+map square [1..10]
+[1,4,9,16,..100)
+
+:t (+) 5
+let add5 = (+_ 5
+map (-5) [1..100]
+
+applyTwice f = f.x
+applyTwice (\x ->x*x) 2
+
+applyTwice f = f x f
+let x = [1..90000000000000000000000000000001]
+x = [1..]
+
+is there identifier for infinity
+
+[1,0..] = -infinity
+can't have infinite list
+
+fibs :: [Int]
+foibs = 0 : 1 :
+
+zip = list of tuples
+zipWith = list of thing with applied function
+
+take 100 [1..9001]
+first 100 element of this list
+
+fibs = 0 : 1 : zipWith (+_ fibs (tail fibs)
+
+primes = 2 : filter isPrime [3,5,..]
+
+isPrime n = all (\p -> n `mod` p /= 0)
+		(takeWhile (\p -> p * p <= n) primes)
+
+not evaluate lazy
+f $ x = f x
+
+f $1 x = eval x immediately
+f $ g $ h = x = lazily evaluated
+seq a b
+
+f $1 x = x `seq` f x
+
+
+SUDOKU
+
+
+type Entry = Char
+
+size :: Int
+size = 3
+
+allNumbers :: [Entry]
+allNumbers :: map (head . show) [1..size^2)
+-- allNumbers = "123456789"
+
+empty :: Entry -> Bool
+enpty x = x == "."
+
+type Trans a = a -> a
+
+rows :: [[a]] -> [[a]]
+rows xss = xss
+
+cols :: [[a]] -> [[a]]
+cols = transpose
+
+boxs :: [[a]] -> [[a]]
+boxs 0
+
+why do you have to transpose?
+
+~> is equal to then
+
+undefined = keyword for placeholder = no type = can't compile
