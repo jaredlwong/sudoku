@@ -1,3 +1,5 @@
+(set! load/suppress-loading-message? #t)
+
 (define sudoku
   '#(#(8 0 1 3 4 0 0 0 0)
      #(4 3 0 8 0 0 1 0 7)
@@ -76,8 +78,51 @@
 (define (sudoku-complete sudoku)
   (let lp ((coors (cross-product (iota 9) (iota 9))))
     (let ((row (car (car coors)))
-	  (col (car (car coors)))
+	  (col (cdr (car coors)))
 	  (rest (cdr coors)))
       (cond ((= (@ sudoku row col) 0) #f)
 	    ((null? rest) #t)
 	    (else (lp rest))))))
+
+(define (sudoku-next-empty sudoku)
+  (let lp ((coors (cross-product (iota 9) (iota 9))))
+    (let ((row (car (car coors)))
+	  (col (cdr (car coors)))
+	  (rest (cdr coors)))
+      (cond ((= (@ sudoku row col) 0) (cons row col))
+	    ((null? rest) #f)
+	    (else (lp rest))))))
+
+(define (sudoku-copy sudoku)
+  (vector-map vector-copy sudoku))
+
+(define (sudoku-set! sudoku row col val)
+  (vector-set! (vector-ref sudoku row) col val))
+
+(define (sudoku-gen-next sudoku)
+  (let* ((coors (sudoku-next-empty sudoku))
+	 (row (car coors))
+	 (col (cdr coors)))
+    (map (lambda (i)
+	   (let ((next-sudoku (sudoku-copy sudoku)))
+	     (sudoku-set! next-sudoku row col i)
+	     next-sudoku))
+	 (cdr (iota 10)))))
+
+(define (sudoku-solve sudoku)
+  (let lp ((queue (list sudoku)))
+    (if (null? queue)
+	#f
+	(let ((sudoku (car queue))
+	      (rest (cdr queue)))
+	  (cond ((not (sudoku-possible sudoku)) (lp rest))
+		((sudoku-complete sudoku) sudoku)
+		(else (lp (append rest (sudoku-gen-next sudoku)))))))))
+
+;(sudoku-solve sudoku)
+(define (sudoku-print sudoku)
+  (let ((l (vector->list (vector-map vector->list sudoku))))
+    (map (lambda (row) (apply string-append (map number->string row))) l)))
+
+(display (sudoku-print sudoku))
+(display (sudoku-print (sudoku-solve sudoku)))
