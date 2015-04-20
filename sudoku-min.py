@@ -1,4 +1,3 @@
-import time
 import sys
 
 def transpose(mat):
@@ -46,25 +45,25 @@ def sudoku_gen_next(sudoku):
     i, j = sudoku_next_empty(sudoku)
     next_sudokus = []
     for k in range(1, 10):
-        sudoku_copy = map(list, sudoku)
-        sudoku_copy[i][j] = k
-        next_sudokus.append(sudoku_copy)
+        def execute(sudoku):
+            sudoku[i][j] = k
+        def undo(sudoku):
+            sudoku[i][j] = 0
+        next_sudokus.append((execute, undo))
     return next_sudokus
 
 def sudoku_solve(sudoku):
-    queue = [sudoku]
-    while len(queue) > 0:
-        sudoku = queue.pop()
-        print_sudoku(sudoku)
-        if not sudoku_possible(sudoku):
-            continue
-        if sudoku_complete(sudoku):
-            return sudoku
-        queue.extend(sudoku_gen_next(sudoku))
+    if not sudoku_possible(sudoku):
+        return None
+    if sudoku_complete(sudoku):
+        return True
+    sudoku_gen_next(sudoku)
+    for execute, undo in sudoku_gen_next(sudoku):
+        execute(sudoku)
+        if sudoku_solve(sudoku):
+            return True
+        undo(sudoku)
     return None
-
-def print_sudoku(sudoku):
-    print ''.join('.' if e == 0 else str(e) for row in sudoku for e in row)
 
 def sudoku_to_str(sudoku):
     rep = ''
@@ -82,26 +81,8 @@ def sudoku_file_to_rep(file_name):
             sudoku.append(map(int, row))
     return sudoku
 
-def parse_sudoku(s):
-    return [[0 if s[i*9+j] == '.' else int(s[i*9+j]) for j in range(9)] for i in range(9)]
-
 if __name__ == '__main__':
-    #sudoku_file = sys.argv[1]
-    #sudoku = sudoku_file_to_rep(sudoku_file)
-    #sudoku_puzzle =[
-    #[0,0,0,0,0,0,0,0,0],
-    #[0,0,0,0,0,3,0,8,5],
-    #[0,0,1,0,2,0,0,0,0],
-    #[0,0,0,5,0,7,0,0,0],
-    #[0,0,4,0,0,0,1,0,0],
-    #[0,9,0,0,0,0,0,0,0],
-    #[5,0,0,0,0,0,0,7,3],
-    #[0,0,2,0,1,0,0,0,0],
-    #[0,0,0,0,4,0,0,0,9]]
-    sudoku_puzzle = parse_sudoku('.....6....59.....82....8....45........3........6..3.54...325..6..................')
-    start = time.clock()
-    print sudoku_solve(sudoku_puzzle)
-    t = time.clock()-start
-    print t
-    #print sudoku_sqr_keys 
-    #print sudoku_to_str(sudoku_solve(sudoku_puzzle))
+    sudoku_file = sys.argv[1]
+    sudoku = sudoku_file_to_rep(sudoku_file)
+    print sudoku_sqr_keys 
+    #print sudoku_to_str(sudoku_solve(sudoku))

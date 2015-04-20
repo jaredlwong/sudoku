@@ -11,3 +11,7 @@ All of them follow the same general plan:
 - generate new copies of the sudoku puzzle with the next empty space filled in
   with 1 to 9
 - add the next sudoku steps to our queue
+
+Scheme
+------
+http://srfi.schemers.org/final-srfis.html

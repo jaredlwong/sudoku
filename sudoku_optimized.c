@@ -1,12 +1,13 @@
 #include "string.h"
 #include "stdio.h"
 
-typedef unsigned char board_t[81];
+typedef unsigned char uint8_t;
 
 #define BOARD_GET(BOARD, R, C) ((BOARD)[(R)*9+(C)])
 #define BOARD_SET(BOARD, R, C, V) ((BOARD)[(R)*9+(C)] = (V))
 
-board_t sudoku = {
+/*
+uint8_t sudoku = {
 	8, 0, 1, 3, 4, 0, 0, 0, 0,
 	4, 3, 0, 8, 0, 0, 1, 0, 7,
 	0, 0, 0, 0, 6, 0, 0, 0, 3,
@@ -17,12 +18,18 @@ board_t sudoku = {
 	1, 0, 5, 0, 0, 6, 0, 4, 2,
 	0, 0, 0, 0, 2, 4, 3, 0, 8
 };
+*/
 
-void print_board(board_t *board) {
+/*
+uint8_t sudoku = {8,0,1,3,4,0,0,0,0,4,3,0,8,0,0,1,0,7,0,0,0,0,6,0,0,0,3,2,0,8,0,5,0,0,0,9,0,0,9,0,0,0,7,0,0,6,0,0,0,7,0,8,0,4,3,0,0,0,1,0,0,0,0,1,0,5,0,0,6,0,4,2,0,0,0,0,2,4,3,0,8};
+*/
+
+
+void print_board(uint8_t *board) {
 	int i, j;
 	for (i = 0; i < 9; ++i) {
 		for (j = 0; j < 9; ++j) {
-			printf("%d", BOARD_GET((*board), i, j));
+			printf("%d", BOARD_GET(board, i, j));
 			if (j == 2 || j == 5) {
 				printf(" | ");
 			} else if (j < 8) {
@@ -37,7 +44,7 @@ void print_board(board_t *board) {
 	}
 }
 
-int sudoku_possible(board_t *board) {
+int sudoku_possible(uint8_t *board) {
 	int g, i, j, k, l, sum;
 
 	/* 27 rows/cols/sqrs X 0-9 possible values */
@@ -46,13 +53,13 @@ int sudoku_possible(board_t *board) {
 
 	for (i = 0; i < 9; ++i, ++g) {
 		for (j = 0; j < 9; ++j) {
-			++seen[g][BOARD_GET((*board), i, j)];
+			++seen[g][BOARD_GET(board, i, j)];
 		}
 	}
 
 	for (i = 0; i < 9; ++i, ++g) {
 		for (j = 0; j < 9; ++j) {
-			++seen[g][BOARD_GET((*board), j, i)];
+			++seen[g][BOARD_GET(board, j, i)];
 		}
 	}
 
@@ -60,7 +67,7 @@ int sudoku_possible(board_t *board) {
 		for (j = 0; j < 3; ++j, ++g) {
 			for (k = i*3; k < i*3+3; ++k) {
 				for (l = j*3; l < j*3+3; ++l) {
-					++seen[g][BOARD_GET((*board), k, l)];
+					++seen[g][BOARD_GET(board, k, l)];
 				}
 			}
 		}
@@ -75,59 +82,74 @@ int sudoku_possible(board_t *board) {
 	return sum == 0;
 }
 
-int sudoku_complete(board_t *board) {
+int sudoku_complete(uint8_t *board) {
 	int i, j, sum;
 	sum = 0;
 	for (i = 0; i < 9; ++i) {
 		for (j = 0; j < 9; ++j) {
-			sum += (BOARD_GET((*board), i, j) == 0);
+			sum += (BOARD_GET(board, i, j) == 0);
 		}
 	}
 	return sum == 0;
 }
 
-void sudoku_next_empty(board_t *board, int *r, int *c) {
-	for (*r = 0; *r < 9; ++*r) {
-		for (*c = 0; *c < 9; ++*c) {
-			if (BOARD_GET((*board), *r, *c) == 0) {
-				return;
-			}
-		}
+void sudoku_constants(uint8_t *board, int constants[81]) {
+	int i;
+	for (i = 0; i < 81; ++i) {
+		constants[i] = (board[i] != 0);
 	}
 }
 
-board_t *solve_sudoku(board_t *board) {
-	int i, r, c;
-
-	/* if not possible, return 0 */
-	if (!sudoku_possible(board)) {
-		return 0;
-	}
-
-	/* if possible and complete, return */
-	if (sudoku_complete(board)) {
-		return board;
-	}
-
-	/* sudoku_gen_next_boards(cur_board, &head, &tail); */
-	sudoku_next_empty(board, &r, &c);
-	for (i = 1; i <= 9; ++i) {
-		board_t new_board, *soln_board;
-		memcpy(new_board, board, sizeof(board_t));
-		BOARD_SET(new_board, r, c, i);
-		soln_board = solve_sudoku(&new_board);
-		if (soln_board != 0) {
-			return soln_board;
+int sudoku_next_empty(uint8_t *board, int constants[81]) {
+	int i;
+	for (i = 0; i < 81; ++i) {
+		if (!constants[i] && board[i] == 0) {
+			return i;
 		}
 	}
+	return -1;
+}
 
+int sudoku_previous_empty(uint8_t *board, int constants[81]) {
+	int i;
+	for (i = 80; i >= 0; --i) {
+		if (!constants[i] && board[i] != 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int solve_sudoku(uint8_t *board) {
+	int i;
+	int constants[81];
+
+	sudoku_constants(board, constants);
+
+	for (;;) {
+		if (sudoku_complete(board)) {
+			return 1;
+		}
+		if (sudoku_possible(board)) {
+			i = sudoku_next_empty(board, constants);
+			board[i] = 1;
+		} else {
+			i = sudoku_previous_empty(board, constants);
+			while (board[i] == 9) {
+				board[i] = 0;
+				i = sudoku_previous_empty(board, constants);
+			}
+			board[i]++;
+		}
+	}
 	return 0;
 }
 
 int main(void)
 {
-	board_t *soln = solve_sudoku(&sudoku);
-	print_board(soln);
+	uint8_t sudoku[81] = {0,0,0,0,0,6,0,0,0,0,5,9,0,0,0,0,0,8,2,0,0,0,0,8,0,0,0,0,4,5,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,6,0,0,3,0,5,4,0,0,0,3,2,5,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	solve_sudoku(sudoku);
+	print_board(sudoku);
 
 	return 0;
 }
