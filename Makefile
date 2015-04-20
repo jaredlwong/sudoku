@@ -12,6 +12,9 @@ c:
 c-optimized:
 	gcc-4.8 -funroll-loops -O3 -std=c89 -Wpedantic -Wall -Wextra -o sudoku sudoku_optimized.c
 
+c-fast:
+	gcc-4.8 -funroll-loops -O3 -std=c89 -Wpedantic -Wall -Wextra -o sudoku sudoku_fast.c
+
 go:
 	go run sudoku.go
 

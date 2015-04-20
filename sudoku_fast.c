@@ -1,3 +1,5 @@
+#include "stdio.h"
+
 typedef unsigned char uint8_t;
 
 #define GET(ARRAY, I, J) ((ARRAY)[(I)*9+(J)])
@@ -6,11 +8,34 @@ typedef unsigned char uint8_t;
 #define INDEX2J(INDEX) ((INDEX)%9)
 #define IJ2INDEX(I, J) (((I)/3)*3+((J)/3))
 
+void parse_sudoku(char *str_rep, uint8_t *sudoku) {
+	int i;
+	for (i = 0; i < 81; ++i) {
+		if (str_rep[i] == '.') {
+			sudoku[i] = 0;
+		} else {
+			sudoku[i] = str_rep[i] - '0';
+		}
+	}
+}
+
+void print_sudoku(uint8_t *sudoku) {
+	int i;
+	for (i = 0; i < 81; ++i) {
+		if (sudoku[i] == 0) {
+			printf(".");
+		} else {
+			printf("%d", sudoku[i]);
+		}
+	}
+	printf("\n");
+}
+
 /* return number of constants in array */
 int sudoku_constants(uint8_t *board, uint8_t *constants) {
 	int i, c = 0;
 	for (i = 0; i < 81; ++i) {
-		if (board[i] != 0) {
+		if (board[i] == 0) {
 			constants[c++] = i;
 		}
 	}
@@ -63,70 +88,63 @@ int sudoku_solve(uint8_t *sudoku) {
 	int num_consts;
 	int i, j;
 
-	num_const = sudoku_constants(sudoku, constants);
+	num_consts = sudoku_constants(sudoku, constants);
 	sudoku_rows(sudoku, rows);
 	sudoku_cols(sudoku, cols);
 	sudoku_sqrs(sudoku, sqrs);
 
 	for (;;) {
-		if (sudoku[constants[num_const-1]] != 0) {
+		if (sudoku[constants[num_consts-1]] != 0) {
 			return 1;
 		}
 		i = INDEX2I(constants[cur_const]);
 		j = INDEX2J(constants[cur_const]);
-		GET(sudoku, i, j) = 1;
+		SET(sudoku, i, j, 1);
 		while (GET(rows, i, GET(sudoku, i, j)-1) ||
 		       GET(cols, j, GET(sudoku, i, j)-1) ||
 		       GET(sqrs, IJ2INDEX(i, j), GET(sudoku, i, j)-1)) {
 			if (GET(sudoku, i, j) == 9) {
-
+				SET(sudoku, i, j, 0);
+				cur_const--;
+				i = INDEX2I(constants[cur_const]);
+				j = INDEX2J(constants[cur_const]);
+				while (GET(sudoku, i, j) == 9) {
+					SET(rows, i, GET(sudoku, i, j)-1, 0);
+					SET(cols, j, GET(sudoku, i, j)-1, 0);
+					SET(sqrs, IJ2INDEX(i,j), GET(sudoku, i, j)-1, 0);
+					SET(sudoku, i, j, 0);
+					cur_const--;
+					i = INDEX2I(constants[cur_const]);
+					j = INDEX2J(constants[cur_const]);
+				}
+				SET(rows, i, GET(sudoku, i, j)-1, 0);
+				SET(cols, j, GET(sudoku, i, j)-1, 0);
+				SET(sqrs, IJ2INDEX(i,j), GET(sudoku, i, j)-1, 0);
 			}
-			SET(sudoku, i, j, GET(sudoku, i, j)+1;
+			SET(sudoku, i, j, GET(sudoku, i, j)+1);
 		}
+		SET(rows, i, GET(sudoku, i, j)-1, 1);
+		SET(cols, j, GET(sudoku, i, j)-1, 1);
+		SET(sqrs, IJ2INDEX(i,j), GET(sudoku, i, j)-1, 1);
+		cur_const++;
 	}
-    while True:
-        if sudoku[constants[-1][0]][constants[-1][1]] != 0:
-            return sudoku
-        i, j = constants[curconst]
-        sudoku[i][j] = 1
-        while (rows[i][sudoku[i][j]-1] or
-               cols[j][sudoku[i][j]-1] or
-               sqrs[IJ2INDEX(i,j)][sudoku[i][j]-1]):
-            if sudoku[i][j] == 9:
-                sudoku[i][j] = 0
-                curconst -= 1
-                i, j = constants[curconst]
-                while sudoku[i][j] == 9:
-                    rows[i][sudoku[i][j]-1] = False
-                    cols[j][sudoku[i][j]-1] = False
-                    sqrs[row_col_to_sqr(i,j)][sudoku[i][j]-1] = False
-                    sudoku[i][j] = 0
-                    curconst -= 1
-                    i, j = constants[curconst]
-                rows[i][sudoku[i][j]-1] = False
-                cols[j][sudoku[i][j]-1] = False
-                sqrs[row_col_to_sqr(i,j)][sudoku[i][j]-1] = False
-            sudoku[i][j] += 1
-        rows[i][sudoku[i][j]-1] = True
-        cols[j][sudoku[i][j]-1] = True
-        sqrs[row_col_to_sqr(i,j)][sudoku[i][j]-1] = True
-        curconst += 1
-    return 0;
+	return 0;
 }
 
-def parse_sudoku(s):
-    return [[0 if s[i*9+j] == '.' else int(s[i*9+j]) for j in range(9)] for i in range(9)]
+int main(int argc, char **argv) {
+	/* char strrep[81] = ".....6....59.....82....8....45........3........6..3.54...325..6..................";*/
+	char *strrep = argv[1];
+	uint8_t sudoku[81] = {0};
+	parse_sudoku(strrep, sudoku);
+	sudoku_solve(sudoku);
+	print_sudoku(sudoku);
+	return 0;
+}
 
-
-if __name__ == '__main__':
-    #print sudoku_puzzle
-    #print sudoku_rows(sudoku_puzzle)
-    #print sudoku_rowsx(sudoku_puzzle)
-    #print sudoku_cols(sudoku_puzzle)
-    #print sudoku_colsx(sudoku_puzzle)
-    #print sudoku_sqrsx(sudoku_puzzle)
-    sudoku_puzzle = parse_sudoku('.....6....59.....82....8....45........3........6..3.54...325..6..................')
+/*
+    sudoku_puzzle = parse_sudoku()
     start = time.clock()
     print sudoku_solve(sudoku_puzzle)
     t = time.clock()-start
     print t
+    */
