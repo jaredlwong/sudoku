@@ -5,16 +5,6 @@ cpp:
 xxx:
 	/usr/local/jgplsrc/j/bin/jconsole < hj.j
 
-c:
-	gcc-4.8 -O3 -std=c89 -Wpedantic -Wall -Wextra -o sudoku sudoku.c
-	./sudoku
-
-c-optimized:
-	gcc-4.8 -funroll-loops -O3 -std=c89 -Wpedantic -Wall -Wextra -o sudoku sudoku_optimized.c
-
-c-fast:
-	gcc-4.8 -funroll-loops -O3 -std=c89 -Wpedantic -Wall -Wextra -o sudoku sudoku_fast.c
-
 go:
 	go run sudoku.go
 
@@ -34,3 +24,15 @@ scheme:
 
 python:
 	python sudoku.py tests/test1.txt
+
+rust-compose:
+	docker-compose up --detach --build sudoku-rust
+
+rust-exec:
+	docker-compose exec sudoku-rust /bin/bash
+
+c-compose:
+	docker-compose up --detach --build sudoku-c
+
+c-exec:
+	docker-compose exec sudoku-c /bin/bash

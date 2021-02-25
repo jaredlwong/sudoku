@@ -33,7 +33,7 @@ def sudoku_sqrs(sudoku):
     sqrs = {(x, y): [] for x in range(3) for y in range(3)}
     for i, row in enumerate(sudoku):
         for j, v in enumerate(row):
-            sqrs[(i/3, j/3)].append(v)
+            sqrs[(i//3, j//3)].append(v)
     return sqrs.values()
 
 def grp_okay(grp):
@@ -104,7 +104,7 @@ def sudoku_to_str(sudoku):
     return sudoku_fmt.format(*[x if x != 0 else " " for r in sudoku for x in r])
 
 if __name__ == '__main__':
-    print sudoku_solve(sudoku_puzzle)
+    print(sudoku_solve(sudoku_puzzle))
     #s =  sudoku_next(sudoku_puzzle)
     #print sudoku_to_str(sudoku_puzzle)
     #print sudoku_to_str(s.next())
