@@ -36,3 +36,15 @@ c-compose:
 
 c-exec:
 	docker-compose exec sudoku-c /bin/bash
+
+go-compose:
+	docker-compose up --detach --build sudoku-go
+
+go-exec:
+	docker-compose exec sudoku-go /bin/bash
+
+node-compose:
+	docker-compose up --detach --build sudoku-node
+
+node-exec:
+	docker-compose exec sudoku-node /bin/bash

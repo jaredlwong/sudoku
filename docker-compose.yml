@@ -1,13 +1,29 @@
 services:
+
   sudoku-rust:
     build: ./rust
     volumes:
       - ./rust:/code
     stdin_open: true
     tty: true
+
   sudoku-c:
     build: ./c
     volumes:
       - ./c:/code
+    stdin_open: true
+    tty: true
+
+  sudoku-go:
+    build: ./go
+    volumes:
+      - ./go:/code
+    stdin_open: true
+    tty: true
+
+  sudoku-node:
+    build: ./node
+    volumes:
+      - ./node:/code
     stdin_open: true
     tty: true
