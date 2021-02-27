@@ -27,3 +27,10 @@ services:
       - ./node:/code
     stdin_open: true
     tty: true
+
+  sudoku-haskell:
+    build: ./haskell
+    volumes:
+      - ./haskell:/code
+    stdin_open: true
+    tty: true

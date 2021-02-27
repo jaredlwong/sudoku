@@ -48,3 +48,9 @@ node-compose:
 
 node-exec:
 	docker-compose exec sudoku-node /bin/bash
+
+haskell-compose:
+	docker-compose up --detach --build sudoku-haskell
+
+haskell-exec:
+	docker-compose exec sudoku-haskell /bin/bash
