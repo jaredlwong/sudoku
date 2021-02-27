@@ -1,5 +1,5 @@
 build:
-	tsc hello.js
+	tsc hello.ts
 
 run:
 	node hello.js
