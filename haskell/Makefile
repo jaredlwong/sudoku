@@ -3,3 +3,6 @@ build:
 
 run:
 	./sudoku
+
+build_better:
+	ghc -o sudoku_better sudoku-better.hs
