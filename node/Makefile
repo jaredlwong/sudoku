@@ -1,5 +1,5 @@
 build:
-	tsc hello.ts
+	tsc sudoku.ts
 
 run:
-	node hello.js
+	node sudoku.js
