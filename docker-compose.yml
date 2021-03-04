@@ -34,3 +34,17 @@ services:
       - ./haskell:/code
     stdin_open: true
     tty: true
+
+  sudoku-python:
+    build: ./python
+    volumes:
+      - ./python:/code
+    stdin_open: true
+    tty: true
+
+  sudoku-elixir:
+    build: ./elixir
+    volumes:
+      - ./elixir:/code
+    stdin_open: true
+    tty: true

@@ -54,3 +54,18 @@ haskell-compose:
 
 haskell-exec:
 	docker-compose exec sudoku-haskell /bin/bash
+
+python-compose:
+	docker-compose up --detach --build sudoku-python
+
+python-exec:
+	docker-compose exec sudoku-python /bin/bash
+
+elixir-compose:
+	docker-compose up --detach --build sudoku-elixir
+
+elixir-exec:
+	docker-compose exec sudoku-elixir /bin/bash
+
+stop:
+	docker-compose stop

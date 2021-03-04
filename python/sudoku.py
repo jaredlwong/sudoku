@@ -6,6 +6,7 @@ from typing import FrozenSet
 from typing import Iterator
 from typing import List
 from typing import NewType
+from typing import Optional
 from typing import Tuple
 
 import time
@@ -39,7 +40,7 @@ class Sudoku(object):
     def get(self, row: int, col: int) -> int:
         return self._grid[(row-1)*9+(col-1)]
 
-    def copy_and_set(self, row: int, col: int, v: int):
+    def copy_and_set(self, row: int, col: int, v: int) -> Sudoku:
         new_grid = self._grid.copy()
         new_grid[(row-1)*9+(col-1)] = v
         return Sudoku(new_grid)
@@ -65,7 +66,6 @@ class Sudoku(object):
     def box(self, b: int) -> Iterator[int]:
         r_box = (b - 1) // 3
         c_box = (b - 1) % 3
-        block = []
         for r in range(r_box * 3, r_box * 3 + 3):
             for c in range(c_box * 3, c_box * 3 + 3):
                 yield self.get(r+1, c+1)
@@ -97,8 +97,11 @@ class SudokuSolver(object):
         return all(c != 0 for row in sudoku.rows() for c in row)
 
     @staticmethod
-    def sudoku_gen_next(sudoku: Sudoku) -> List[(int, int, int)]:
-        r, c = SudokuSolver.next_open(sudoku)
+    def sudoku_gen_next(sudoku: Sudoku) -> List[Sudoku]:
+        position = SudokuSolver.next_open(sudoku)
+        if not position:
+            return []
+        r, c = position
         return [sudoku.copy_and_set(r, c, k) for k in range(1, 10)]
 
     @staticmethod
@@ -110,7 +113,7 @@ class SudokuSolver(object):
         return None
 
     @staticmethod
-    def sudoku_solve(sudoku: Sudoku):
+    def sudoku_solve(sudoku: Sudoku) -> Optional[Sudoku]:
         queue = SudokuSolver.sudoku_gen_next(sudoku)
         while len(queue) > 0:
             s = queue.pop()
@@ -148,5 +151,8 @@ sudoku_puzzle = '''
 
 if __name__ == '__main__':
     sudoku: Sudoku = SudokuParser.parse_str(sudoku_puzzle)
-    solved: Sudoku = SudokuSolver.sudoku_solve(sudoku)
-    print(solved._grid)
+    solved: Optional[Sudoku] = SudokuSolver.sudoku_solve(sudoku)
+    if solved:
+        print(solved._grid)
+    else:
+        print(sudoku._grid)

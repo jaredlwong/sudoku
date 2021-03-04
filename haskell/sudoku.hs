@@ -1,3 +1,5 @@
+import System.IO
+
 import qualified Data.List
 import qualified Data.Char
 import qualified Data.Maybe
@@ -16,6 +18,7 @@ sudoku = [8, 0, 1, 3, 4, 0, 0, 0, 0,
           3, 0, 0, 0, 1, 0, 0, 0, 0,
           1, 0, 5, 0, 0, 6, 0, 4, 2,
           0, 0, 0, 0, 2, 4, 3, 0, 8]
+
 
 -- find the first index of 0
 nextEmptySquare :: Sudoku -> Maybe (Int, Int)

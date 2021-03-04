@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 from typing import FrozenSet
+from typing import Set
 from typing import List
 from typing import Tuple
 from typing import NewType
@@ -81,7 +82,7 @@ class Sudoku(object):
             assert(len(row) == 9)
             assert(all(0 <= x and x <= 9 for x in row))
 
-    def initialize_grid(self, sudoku_matrix: List[List[int]]) -> List[List[FrozenSet[int]]:
+    def initialize_grid(self, sudoku_matrix: List[List[int]]) -> List[List[FrozenSet[int]]]:
         """Each value in the matrix is between 0 and 9. 0 means empty.
         Convert this to a matrix with Candidates for values instead of integers.
         """
@@ -152,7 +153,7 @@ class Sudoku(object):
         return frozenset((r + 1, c + 1) for r in range(9) for c in range(9) if len(self.grid[r][c]) == 1)
 
     def s1_col_elimination(self, r: int, c: int):
-        solved_nums = set()
+        solved_nums: Set[int] = set()
         for i in range(1, 10):
             if i == c:
                 pass
