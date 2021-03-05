@@ -1,3 +1,6 @@
+# tuples are laid out consecutively in memory
+# tuples can't be updated in place!!! this makes this super slow
+
 defmodule Sudoku do
   @enforce_keys [:grid]
   defstruct [:grid]

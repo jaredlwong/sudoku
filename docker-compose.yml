@@ -1,50 +1,57 @@
 services:
 
-  sudoku-rust:
+  rust:
     build: ./rust
     volumes:
       - ./rust:/code
     stdin_open: true
     tty: true
 
-  sudoku-go:
+  go:
     build: ./go
     volumes:
       - ./go:/code
     stdin_open: true
     tty: true
 
-  sudoku-node:
+  node:
     build: ./node
     volumes:
       - ./node:/code
     stdin_open: true
     tty: true
 
-  sudoku-haskell:
+  haskell:
     build: ./haskell
     volumes:
       - ./haskell:/code
     stdin_open: true
     tty: true
 
-  sudoku-elixir:
+  elixir:
     build: ./elixir
     volumes:
       - ./elixir:/code
     stdin_open: true
     tty: true
 
-  sudoku-c:
+  c:
     build: ./c
     volumes:
       - ./c:/code
     stdin_open: true
     tty: true
 
-  sudoku-python:
+  python:
     build: ./python
     volumes:
       - ./python:/code
+    stdin_open: true
+    tty: true
+
+  ocaml:
+    build: ./ocaml
+    volumes:
+      - ./ocaml:/code
     stdin_open: true
     tty: true
