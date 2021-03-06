@@ -14,6 +14,11 @@ Using a sudoku solver as a simple way to learn new languages
 | java            | done        |
 | kotlin          | done        |
 | ocaml           | in progress |
+| prolog          | todo        |
+| erlang          | todo        |
+| cpp             | todo        |
+| j               | todo        |
+| scheme          | in progress |
 
 All are launched via docker-compose and run within a docker container
 
