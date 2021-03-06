@@ -124,7 +124,10 @@ defmodule Main do
   def main do
     s = Sudoku.string_to_sudoku("801340000430800107000060003208050009009000700600070804300010000105006042000024308")
     IO.puts(Sudoku.to_string(s))
-    IO.puts(Sudoku.to_string(Sudoku.solve(s)))
+    # https://til.hashrocket.com/posts/9jxsfxysey-timing-a-function-in-elixir
+    :timer.tc(fn ->
+      IO.puts(Sudoku.to_string(Sudoku.solve(s)))
+    end) |> elem(0) |> (&(IO.puts("microseconds #{&1}"))).()
   end
 end
 
