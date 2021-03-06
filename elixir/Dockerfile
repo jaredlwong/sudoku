@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
 # Need build-essential for `cc` linker
-RUN apt-get update && apt-get install -y build-essential curl locales locales-all
+RUN apt-get update && apt-get install -y build-essential curl locales locales-all time
 
 # Set locale to utf8
 # https://leimao.github.io/blog/Docker-Locale/

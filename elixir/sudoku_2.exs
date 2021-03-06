@@ -62,11 +62,11 @@ defmodule Sudoku do
     all_valid_boxes = for b <- 0..8 do
       box_row = div(b, 3)
       box_col = Integer.mod(b, 3)
-      for r <- box_row*3..box_row*3+2 do
+      Enum.flat_map(box_row*3..box_row*3+2, fn r ->
         for c <- box_col*3..box_col*3+2 do
           Sudoku.get(sudoku, r, c)
-        end
-      end |> Sudoku.is_valid_group?
+        end |> Enum.to_list
+      end) |> Sudoku.is_valid_group?
     end |> Enum.all?
 
     all_valid_rows and all_valid_cols and all_valid_boxes

@@ -11,7 +11,7 @@ sudoku: bin
 		-Wmissing-declarations \
 		-Wdeclaration-after-statement \
 		-o bin/sudoku sudoku.c
-	./bin/sudoku
+	time ./bin/sudoku
 
 sudoku_optimized: bin
 	gcc -funroll-loops -O3 -std=c89 -Wpedantic -Wall -Wextra -o bin/sudoku_optimized sudoku_optimized.c

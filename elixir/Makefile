@@ -10,4 +10,4 @@ sudoku_3:
 sudoku_4:
 	time elixir sudoku_4.exs
 
-all: sudoku sudoku_2 sudoku_3
+all: sudoku sudoku_2 sudoku_3 sudoku_4

@@ -4,6 +4,7 @@
 # this is different from the previous versions in that
 # - the grid is just a 1d-tuple (not a 2d tuple)
 # - no Stream usage
+# - validity checks only check the necessary cells
 
 defmodule Sudoku do
 
@@ -32,33 +33,42 @@ defmodule Sudoku do
     MapSet.new(without_zero) |> MapSet.size == without_zero |> Enum.count
   end
 
-  def is_valid?(sudoku) do
+  def all_valid_rows(sudoku) do
     # rows
-    all_valid_rows = for r <- 0..8 do
+    # this is a really dumb hack to make sure that we only evaluate as many cells as we need to
+    # find the first value that is "truthy" which is a row that is not valid
+    # then invert it because we're actually checking if a row is not valid, so it should return false if not valid
+    Enum.find_value(0..8, false, fn r ->
       for c <- 0..8 do
         Sudoku.get(sudoku, r, c)
-      end |> Sudoku.is_valid_group?
-    end |> Enum.all?
+      end |> Sudoku.is_valid_group? |> Kernel.not
+    end) |> Kernel.not
+  end
 
+  def all_valid_cols(sudoku) do
     # cols
-    all_valid_cols = for c <- 0..8 do
+    Enum.find_value(0..8, false, fn c ->
       for r <- 0..8 do
         Sudoku.get(sudoku, r, c)
-      end |> Sudoku.is_valid_group?
-    end |> Enum.all?
+      end |> Sudoku.is_valid_group? |> Kernel.not
+    end) |> Kernel.not
+  end
 
+  def all_valid_boxes(sudoku) do
     # boxes
-    all_valid_boxes = for b <- 0..8 do
+    Enum.find_value(0..8, false, fn b ->
       box_row = div(b, 3)
       box_col = Integer.mod(b, 3)
-      for r <- box_row*3..box_row*3+2 do
+      Enum.flat_map(box_row*3..box_row*3+2, fn r ->
         for c <- box_col*3..box_col*3+2 do
           Sudoku.get(sudoku, r, c)
-        end
-      end |> Sudoku.is_valid_group?
-    end |> Enum.all?
+        end |> Enum.to_list
+      end) |> Sudoku.is_valid_group? |> Kernel.not
+    end) |> Kernel.not
+  end
 
-    all_valid_rows and all_valid_cols and all_valid_boxes
+  def is_valid?(sudoku) do
+    all_valid_rows(sudoku) and all_valid_cols(sudoku) and all_valid_boxes(sudoku)
   end
 
   # return nil or next position
