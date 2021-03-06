@@ -56,17 +56,6 @@ public class Sudoku {
     return true;
   }
 
-  private boolean isComplete() {
-    for (int i = 0; i < 9; i++) {
-      for (int j = 0; j < 9; j++) {
-        if (board[i][j] == 0) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
   private int nextEmpty() {
     for (int r = 0; r < 9; r++) {
       for (int c = 0; c < 9; c++) {
