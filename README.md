@@ -14,6 +14,7 @@ Using a sudoku solver as a simple way to learn new languages
 | java            | done        |
 | kotlin          | done        |
 | ocaml           | in progress |
+| cpp             | todo        |
 | prolog          | todo        |
 | erlang          | todo        |
 | cpp             | todo        |
