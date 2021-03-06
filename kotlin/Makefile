@@ -1,3 +1,3 @@
 sudoku:
 	kotlinc sudoku.kt
-	kotlin SudokuKt
+	time kotlin SudokuKt
