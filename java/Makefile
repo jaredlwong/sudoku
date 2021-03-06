@@ -1,4 +1,4 @@
 java:
 	javac -Xlint:unchecked Sudoku.java
-	java Sudoku
+	time java Sudoku
 

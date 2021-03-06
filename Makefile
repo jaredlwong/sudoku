@@ -34,6 +34,12 @@ c-compose:
 c-exec:
 	docker-compose exec c /bin/bash
 
+java-compose:
+	docker-compose up --detach --build java
+
+java-exec:
+	docker-compose exec java /bin/bash
+
 python-compose:
 	docker-compose up --detach --build python
 

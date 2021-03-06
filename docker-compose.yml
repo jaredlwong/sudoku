@@ -55,3 +55,10 @@ services:
       - ./ocaml:/code
     stdin_open: true
     tty: true
+
+  java:
+    build: ./java
+    volumes:
+      - ./java:/code
+    stdin_open: true
+    tty: true
