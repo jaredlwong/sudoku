@@ -62,3 +62,10 @@ services:
       - ./java:/code
     stdin_open: true
     tty: true
+
+  kotlin:
+    build: ./kotlin
+    volumes:
+      - ./kotlin:/code
+    stdin_open: true
+    tty: true

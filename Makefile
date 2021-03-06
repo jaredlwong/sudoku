@@ -52,5 +52,11 @@ ocaml-compose:
 ocaml-exec:
 	docker-compose exec ocaml /bin/bash
 
+kotlin-compose:
+	docker-compose up --detach --build kotlin
+
+kotlin-exec:
+	docker-compose exec kotlin /bin/bash
+
 stop:
 	docker-compose stop
