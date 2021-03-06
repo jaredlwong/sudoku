@@ -1,5 +1,5 @@
-Sudoku Solvers Rosetta Stone
-============================
+Sudoku Solver Rosetta Stone
+===========================
 Using a sudoku solver as a simple way to learn new languages
 
 | language        | status      |
