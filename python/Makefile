@@ -1,3 +1,7 @@
+.PHONY: run
+
+alt:
+	python go_translation.py ../inputs/only_hard.txt
+
 run:
-	mypy sudoku.py
-	python sudoku.py
+	python sudoku-fast2.py ../inputs/only_hard.txt

@@ -1,5 +1,4 @@
-build:
-	rustc sudoku.rs
+.PHONY: run
 
 run:
-	./sudoku
+	cargo run ../inputs/only_hard.txt

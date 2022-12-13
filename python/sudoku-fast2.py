@@ -1,18 +1,8 @@
+import sys
 import time
 
-sudoku_puzzle = [
-[8,0,1, 3,4,0,0,0,0],
-[4,3,0, 8,0,0,1,0,7],
-[0,0,0, 0,6,0,0,0,3],
-[2,0,8,0,5,0,0,0,9],
-[0,0,9,0,0,0,7,0,0],
-[6,0,0,0,7,0,8,0,4],
-[3,0,0,0,1,0,0,0,0],
-[1,0,5,0,0,6,0,4,2],
-[0,0,0,0,2,4,3,0,8]]
-
 def row_col_to_sqr(row, col):
-    return (row/3)*3+(col/3)
+    return (row//3)*3+(col//3)
 
 def sudoku_constants(sudoku):
     constants = []
@@ -43,7 +33,7 @@ def sudoku_sqrsx(sudoku, sqrs):
                         sqrs[row_col_to_sqr(k,l)][sudoku[k][l]-1] = True
 
 def print_sudoku(sudoku):
-    print ''.join('.' if e == 0 else str(e) for row in sudoku for e in row)
+    print(''.join('.' if e == 0 else str(e) for row in sudoku for e in row))
 
 def sudoku_solve(sudoku):
     constants = sudoku_constants(sudoku)
@@ -86,16 +76,20 @@ def sudoku_solve(sudoku):
 def parse_sudoku(s):
     return [[0 if s[i*9+j] == '.' else int(s[i*9+j]) for j in range(9)] for i in range(9)]
 
-
 if __name__ == '__main__':
-    #print sudoku_puzzle
-    #print sudoku_rows(sudoku_puzzle)
-    #print sudoku_rowsx(sudoku_puzzle)
-    #print sudoku_cols(sudoku_puzzle)
-    #print sudoku_colsx(sudoku_puzzle)
-    #print sudoku_sqrsx(sudoku_puzzle)
-    sudoku_puzzle = parse_sudoku('.....6....59.....82....8....45........3........6..3.54...325..6..................')
-    start = time.clock()
-    print sudoku_solve(sudoku_puzzle)
-    t = time.clock()-start
-    print t
+    file_name = sys.argv[1]
+    with open(file_name) as f:
+        lines = [line.strip() for line in f.readlines() if line.strip()]
+        for i in range(0, len(lines), 2):
+            input = lines[i]
+            expected = lines[i+1]
+            sudoku_puzzle = parse_sudoku(input)
+            start = time.time()
+            output = sudoku_solve(sudoku_puzzle)
+            end = time.time()
+            elapsed = (end - start) * 1000
+            output_str = ''.join(''.join(map(str, row)) for row in output)
+            if output_str == expected:
+                print(f"Solved sudoku {input} in {elapsed} ms")
+            else:
+                print(f"Failed to solve sudoku {input}. Expected {expected}, got {output_str}")

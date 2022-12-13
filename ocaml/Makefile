@@ -1,4 +1,5 @@
-.PHONY: sudoku
-sudoku:
+.PHONY: run
+
+run:
 	ocamlc -o sudoku sudoku.ml
-	./sudoku
+	./sudoku ../inputs/only_hard.txt
