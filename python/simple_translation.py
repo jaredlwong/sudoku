@@ -1,5 +1,6 @@
 import sys
 import time
+from functools import reduce
 
 from typing import List
 
@@ -8,6 +9,10 @@ def string_to_puzzle(input: str) -> List[List[int]]:
         [int(input[i*9+j]) if input[i*9+j] != '.' else 0 for j in range(9)]
         for i in range(9)
     ]
+
+def string_to_puzzle(input: str) -> List[List[int]]:
+    nums = [int(c) if c != '.' else 0 for c in input]
+    return [[nums[i*9+j] for j in range(9)] for i in range(9)]
 
 def puzzle_to_string(grid: List[List[int]]) -> str:
     return ''.join(''.join(str(e) for e in row) for row in grid)
@@ -18,34 +23,54 @@ def is_valid_row(row: List[int]) -> bool:
         checkset[e] += 1
     return all(e <= 1 for e in checkset[1:])
 
+def is_valid_row(row: List[int]) -> bool:
+    return all(map(lambda x: x <= 1, reduce(lambda acc, x: acc[x-1] += 1, row, [0] * 9)))
+
 def is_valid(grid: List[List[int]]) -> bool:
     # check rows
-    for r in range(9):
-        if not is_valid_row(grid[r]):
-            return False
+    if any(not is_valid_row(grid[r]) for r in range(9)):
+        return False
 
     # check cols
     transposed = list(zip(*grid))
-    for c in range(9):
-        if not is_valid_row(transposed[c]):
-            return False
+    if any(not is_valid_row(transposed[c]) for c in range(9)):
+        return False
 
     # check boxes
-    for x in range(9):
-        box_row: int = x // 3
-        box_col: int = x % 3
-        box: List[int] = [
-            grid[r][c]
-            for r in range(box_row * 3, box_row * 3 + 3)
-            for c in range(box_col * 3, box_col * 3 + 3)
-        ]
-        if not is_valid_row(box):
-            return False
+    box_rows_cols: List[tuple(int, int)] = [(x // 3, x % 3) for x in range(9)]
+    boxes = [
+        [grid[r][c] for r in range(box_row * 3, box_row * 3 + 3) for c in range(box_col * 3, box_col * 3 + 3)]
+        for box_row, box_col in box_rows_cols
+    ]
+    if any(not is_valid_row(boxes)):
+        return False
+    # for x in range(9):
+    #     box_row: int = x // 3
+    #     box_col: int = x % 3
+    #     box: List[int] = [
+    #         grid[r][c]
+    #         for r in range(box_row * 3, box_row * 3 + 3)
+    #         for c in range(box_col * 3, box_col * 3 + 3)
+    #     ]
+    #     if not is_valid_row(box):
+    #         return False
 
     return True
 
-# def next_open(grid: List[List[int]]):
+import itertools
+def check_boxes(grid: List[List[int]]) -> bool:
+    indices = [list(itertools.product(range((x // 3) * 3, (x // 3) * 3 + 3), range((x % 3) * 3, (x % 3) * 3 + 3))) for x in range(9)]
+    boxes = [[grid[r][c] for r, c in index] for index in indices]
+    return all(is_valid_row(boxes))
+
+import itertools
 def next_open(grid):
+    indices = itertools.product(range(9), range(9))
+    opened = filter(lambda x: grid[x[0]][x[1]] == 0, indices)
+    return next(opened, None)
+    # return next(((r, c) for r, c in itertools.product(range(9), range(9)) if grid[r][c] == 0), None)
+
+def next_open(grid: List[List[int]]):
     for r in range(9):
         for c in range(9):
             if grid[r][c] == 0:

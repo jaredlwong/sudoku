@@ -1,58 +1,68 @@
-(* Convert the input puzzle to a 2d vector *)
-let convert (input : string) : int array array =
-  let grid : int array array = Array.make_matrix 9 9 0 in
-  let n = String.length input in
-  for i = 0 to n - 1 do
-    let row = i / 9 in
-    let col = i mod 9 in
-    let value = input.[i] in
-    if value <> '.' then
-      let int_val = int_of_string (String.make 1 value) in
-      grid.(row).(col) <- int_val
-  done;
-  grid
+open List
 
-let is_valid (grid : int array array) : bool =
-  (* Check rows. *)
-  let rows_ok =
-    for r = 0 to 8 do
-      let checkset : int array = Array.make 10 0 in
-      for c = 0 to 8 do
-        checkset.(grid.(r).(c)) <- checkset.(grid.(r).(c)) + 1;
-        if grid.(r).(c) > 0 && checkset.(grid.(r).(c)) > 1 then
-          false
-        else
-          true
-      done;
-    done;
-    true;
+let explode s = List.init (String.length s) (String.get s)
 
-  (* Check cols. *)
-  for c = 0 to 8 do
-    let checkset : int array = Array.make 10 0 in
-    for r = 0 to 8 do
-      checkset.(grid.(r).(c)) <- checkset.(grid.(r).(c)) + 1;
-      if grid.(r).(c) > 0 && checkset.(grid.(r).(c)) > 1 then
-        false
-    done;
-  done;
+let range start end_ =
+  let rec range_ acc i =
+    if i = end_ then acc
+    else range_ (i :: acc) (i + 1)
+  in
+  List.rev (range_ [] start)
 
-  (* Check boxes. *)
-  for x = 0 to 8 do
-    let checkset : int array = Array.make 10 0 in
-    let box_row = x / 3 in
-    let box_col = x mod 3 in
-    for r = box_row * 3 to box_row * 3 + 2 do
-      for c = box_col * 3 to box_col * 3 + 2 do
-        checkset.(grid.(r).(c)) <- checkset.(grid.(r).(c)) + 1;
-        if grid.(r).(c) > 0 && checkset.(grid.(r).(c)) > 1 then
-          false
-      done;
-    done;
-  done;
+let string_to_puzzle input =
+  let nums = List.map (fun c ->
+    if c = '.' then 0
+    else int_of_string (String.make 1 c)
+  ) (explode input) in
+  List.map (fun i ->
+    List.map (fun j ->
+      List.nth nums (i*9+j)) (range 0 9)) (range 0 9)
 
-  (* Return true if no duplicates were found. *)
-  true
+let is_valid_row (row: int list) : bool =
+  let checkset = Array.make 10 0 in
+  List.iter (fun e -> checkset.(e) <- checkset.(e) + 1) row;
+  List.for_all (fun e -> e <= 1) (Array.to_list (Array.sub checkset 1 9))
+
+
+let lookup (grid: int list list) (row: int) (col: int) : int =
+  List.nth (List.nth grid row) col
+
+let check_boxes grid =
+  let indices =
+    map (fun x ->
+      List.combine (range ((x / 3) * 3) ((x / 3) * 3 + 3)) (range ((x mod 3) * 3) ((x mod 3) * 3 + 3))
+    ) (range 0 9)
+  in
+  let boxes =
+    map (fun index ->
+      List.map (fun (r, c) -> lookup grid r c) index
+    ) indices
+  in
+  List.for_all is_valid_row boxes
+
+
+let is_valid (grid: int list list) : bool =
+  (* check rows *)
+  if List.exists (fun r -> not (is_valid_row (List.nth grid r))) (range 0 9) then
+    false
+  else
+    (* check cols *)
+    let transposed = List.map (fun col -> List.map (fun row -> List.nth row col) grid) (range 0 9) in
+    if List.exists (fun c -> not (is_valid_row (List.nth transposed c))) (range 0 9) then
+      false
+    else
+      (* check boxes *)
+      check_boxes grid
+
+let cartesian l l' = 
+  List.concat (List.map (fun e -> List.map (fun e' -> (e,e')) l') l)
+
+let next_open (grid: int list list) =
+  let indices = cartesian (range 0 9) (range 0 9) in
+  let opened = List.filter (fun (x, y) -> (lookup grid x y) = 0) indices in
+  match opened with
+  | hd :: _ -> Some hd
+  | _ -> None
 
 (* Print every two lines together *)
 let rec print_pairs = function

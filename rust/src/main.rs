@@ -4,6 +4,157 @@ use std::fmt;
 use std::time::Instant;
 
 
+macro_rules! get {
+    ($array:ident, $i:expr, $j:expr) => {
+        $array[$i * 9 + $j] as usize
+    }
+}
+
+macro_rules! set {
+    ($array:ident, $i:expr, $j:expr, $v:expr) => {
+        $array[$i * 9 + $j] = $v;
+    }
+}
+
+macro_rules! index2i {
+    ($index:expr) => {
+        $index / 9
+    }
+}
+
+macro_rules! index2j {
+    ($index:expr) => {
+        $index % 9
+    }
+}
+
+macro_rules! ij2index {
+    ($i:expr, $j:expr) => {
+        ($i / 3) * 3 + ($j / 3)
+    }
+}
+
+fn parse_sudoku(str_rep: &str, sudoku: &mut [u8; 81]) {
+    for (i, c) in str_rep.chars().enumerate() {
+        if c == '.' {
+            sudoku[i] = 0;
+        } else {
+            sudoku[i] = c.to_digit(10).unwrap() as u8;
+        }
+    }
+}
+
+fn sudoku_to_string(sudoku: &[u8]) -> String {
+    sudoku.iter().map(|c| {
+        if *c == 0 { '.' } else { std::char::from_digit(*c as u32, 10).unwrap() }
+    }).collect()
+}
+
+/* return number of constants in array */
+fn sudoku_constants(board: &[u8], constants: &mut [u8]) -> usize {
+    let mut c = 0;
+    for (i, b) in board.iter().enumerate() {
+        if *b == 0 {
+            constants[c] = i as u8;
+            c += 1;
+        }
+    }
+    c
+}
+
+fn sudoku_rows(sudoku: &[u8], rows: &mut [u8]) {
+    for i in 0..9 {
+        for j in 0..9 {
+            if get!(sudoku, i, j) > 0 {
+                set!(rows, i, get!(sudoku, i, j) - 1, 1);
+            }
+        }
+    }
+}
+
+fn sudoku_cols(sudoku: &[u8], cols: &mut [u8]) {
+    for i in 0..9 {
+        for j in 0..9 {
+            if get!(sudoku, j, i) > 0 {
+                set!(cols, i, get!(sudoku, j, i) - 1, 1);
+            }
+        }
+    }
+}
+
+fn sudoku_sqrs(sudoku: &[u8], sqrs: &mut [u8]) {
+    for i in 0..3 {
+        for j in 0..3 {
+            for k in i*3..i*3+3 {
+                for l in j*3..j*3+3 {
+                    if get!(sudoku, k, l) > 0 {
+                        set!(sqrs, ij2index!(k, l), get!(sudoku, k, l)-1, 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn sudoku_solve(sudoku: &mut [u8; 81]) -> bool {
+    let mut constants: [u8; 81] = [0; 81];
+    let mut rows: [u8; 81] = [0; 81];
+    let mut cols: [u8; 81] = [0; 81];
+    let mut sqrs: [u8; 81] = [0; 81];
+    let mut cur_const: usize = 0;
+    let mut i: usize;
+    let mut j: usize;
+
+    let num_consts: usize = sudoku_constants(sudoku, &mut constants);
+    sudoku_rows(sudoku, &mut rows);
+    sudoku_cols(sudoku, &mut cols);
+    sudoku_sqrs(sudoku, &mut sqrs);
+
+    loop {
+        if sudoku[constants[num_consts-1] as usize] != 0 {
+            return true;
+        }
+        i = index2i!(constants[cur_const] as usize);
+        j = index2j!(constants[cur_const] as usize);
+        set!(sudoku, i, j, 1);
+        loop {
+            if get!(rows, i, get!(sudoku, i, j) as usize-1) != 0 ||
+               get!(cols, j, get!(sudoku, i, j) as usize-1) != 0 ||
+               get!(sqrs, ij2index!(i,j), get!(sudoku, i, j) as usize-1) != 0 {
+                if get!(sudoku, i, j) == 9 {
+                    set!(sudoku, i, j, 0);
+                    cur_const -= 1;
+                    i = index2i!(constants[cur_const] as usize);
+                    j = index2j!(constants[cur_const] as usize);
+                    loop {
+                        if get!(sudoku, i, j) == 9 {
+                            set!(rows, i, get!(sudoku, i, j) as usize-1, 0);
+                            set!(cols, j, get!(sudoku, i, j) as usize-1, 0);
+                            set!(sqrs, ij2index!(i,j), get!(sudoku, i, j) as usize-1, 0);
+                            set!(sudoku, i, j, 0);
+                            cur_const -= 1;
+                            i = index2i!(constants[cur_const] as usize);
+                            j = index2j!(constants[cur_const] as usize);
+                        } else {
+                            break;
+                        }
+                    }
+                    set!(rows, i, get!(sudoku, i, j) as usize-1, 0);
+                    set!(cols, j, get!(sudoku, i, j) as usize-1, 0);
+                    set!(sqrs, ij2index!(i,j), get!(sudoku, i, j) as usize-1, 0);
+                }
+                set!(sudoku, i, j, (get!(sudoku, i, j) as u8)+1);
+            } else {
+                break;
+            }
+        }
+        set!(rows, i, get!(sudoku, i, j) as usize-1, 1);
+        set!(cols, j, get!(sudoku, i, j) as usize-1, 1);
+        set!(sqrs, ij2index!(i,j), get!(sudoku, i, j) as usize-1, 1);
+        cur_const += 1;
+    }
+}
+
 struct Sudoku {
     grid: [[usize; 9]; 9],
 }
@@ -129,16 +280,30 @@ fn main() {
     for puzzle in puzzles.chunks(2) {
         let input = puzzle[0];
         let expected = puzzle[1];
-        let mut sudoku: Sudoku = Sudoku::parse_sudoku(input);
+
         let start = Instant::now();
-        sudoku.solve();
+        let mut sudoku: [u8; 81] = [0; 81];
+        parse_sudoku(input, &mut sudoku);
+        sudoku_solve(&mut sudoku);
+        let output = sudoku_to_string(&sudoku);
         let end = Instant::now();
-        let elapsed_time = end.duration_since(start).as_millis();
-        let output = sudoku.to_string();
+        let millis = (end.duration_since(start).as_nanos() as f64) / 1000000.0;
         if output == expected {
-            println!("Solved sudoku {} in {} ms", input, elapsed_time);
+            println!("Solved sudoku {} in {} ms", input, millis);
         } else {
             println!("Failed to solve sudoku {}. Expected {}, got {}", input, expected, output);
         }
+        
+        // let mut sudoku: Sudoku = Sudoku::parse_sudoku(input);
+        // let start = Instant::now();
+        // sudoku.solve();
+        // let end = Instant::now();
+        // let elapsed_time = end.duration_since(start).as_millis();
+        // let output = sudoku.to_string();
+        // if output == expected {
+        //     println!("Solved sudoku {} in {} ms", input, elapsed_time);
+        // } else {
+        //     println!("Failed to solve sudoku {}. Expected {}, got {}", input, expected, output);
+        // }
     }
 }

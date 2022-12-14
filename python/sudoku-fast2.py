@@ -83,12 +83,12 @@ if __name__ == '__main__':
         for i in range(0, len(lines), 2):
             input = lines[i]
             expected = lines[i+1]
-            sudoku_puzzle = parse_sudoku(input)
             start = time.time()
+            sudoku_puzzle = parse_sudoku(input)
             output = sudoku_solve(sudoku_puzzle)
+            output_str = ''.join(''.join(map(str, row)) for row in output)
             end = time.time()
             elapsed = (end - start) * 1000
-            output_str = ''.join(''.join(map(str, row)) for row in output)
             if output_str == expected:
                 print(f"Solved sudoku {input} in {elapsed} ms")
             else:

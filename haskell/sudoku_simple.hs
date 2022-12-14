@@ -4,6 +4,7 @@ import Data.List
 import Data.Maybe
 import System.Exit (exitWith, ExitCode(ExitFailure))
 import Data.Time.Clock.POSIX (getPOSIXTime)
+import Data.Function (on)
 
 
 stringToPuzzle :: String -> [[Int]]
@@ -14,10 +15,17 @@ puzzleToString :: [[Int]] -> String
 puzzleToString grid =
   concat [ concat [ show e | e <- row ] | row <- grid ]
 
+-- isValidRow :: [Int] -> Bool
+-- isValidRow row = all (\e -> e <= 1) (counts row)
+--   where
+--     counts row = map (\n -> length (filter (== n) row)) [1..9]
+
+-- isValidRow :: [Int] -> Bool
+-- isValidRow row = all (\x -> x <= 1) (foldl (\acc x -> acc !! (x-1) += 1) row [0,0,0,0,0,0,0,0,0])
+
 isValidRow :: [Int] -> Bool
-isValidRow row = all (\e -> e <= 1) (counts row)
-  where
-    counts row = map (\n -> length (filter (== n) row)) [1..9]
+isValidRow row = ((==) `on` length) (nub b) b
+  where b = filter (/= 0) row
 
 isValid :: [[Int]] -> Bool
 isValid grid =

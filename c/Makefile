@@ -18,8 +18,8 @@ sudoku_optimized: bin
 	./bin/sudoku_optimized
 
 sudoku_fast: bin
-	gcc -funroll-loops -O3 -std=c89 -Wpedantic -Wall -Wextra -o bin/sudoku_fast sudoku_fast.c
-	./bin/sudoku_fast
+	gcc -funroll-loops -O3 -std=c99 -Wall -Wextra -o bin/sudoku_fast sudoku_fast.c
+	./bin/sudoku_fast ../inputs/only_hard.txt
 
 sudoku_parallel: bin
 	gcc -funroll-loops -O3 -std=c89 -Wpedantic -Wall -Wextra -o bin/sudoku_parallel sudoku_parallel.c

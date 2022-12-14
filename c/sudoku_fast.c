@@ -1,4 +1,7 @@
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 typedef unsigned char uint8_t;
 
@@ -29,6 +32,18 @@ void print_sudoku(uint8_t *sudoku) {
 		}
 	}
 	printf("\n");
+}
+
+void sudoku_to_string(uint8_t *sudoku, char *str_rep) {
+	int i;
+	for (i = 0; i < 81; ++i) {
+		if (sudoku[i] == 0) {
+			str_rep[i] = '.';
+		} else {
+			str_rep[i] = sudoku[i] + '0';
+		}
+	}
+	str_rep[81] = '\0';
 }
 
 /* return number of constants in array */
@@ -131,20 +146,66 @@ int sudoku_solve(uint8_t *sudoku) {
 	return 0;
 }
 
-int main(int argc, char **argv) {
-	/* char strrep[81] = ".....6....59.....82....8....45........3........6..3.54...325..6..................";*/
-	char *strrep = argv[1];
-	uint8_t sudoku[81] = {0};
-	parse_sudoku(strrep, sudoku);
-	sudoku_solve(sudoku);
-	print_sudoku(sudoku);
+#define MAX_LINE_LENGTH 1024 // Maximum length of a line in the input file
+
+int main(int argc, char *argv[]) {
+    // Check if a filename was provided as an argument
+    if (argc != 2) {
+        printf("Error: missing filename\n");
+        return 1;
+    }
+
+    // Open the file for reading
+    FILE *file = fopen(argv[1], "r");
+    if (file == NULL) {
+        printf("Error: unable to open file '%s'\n", argv[1]);
+        return 1;
+    }
+
+  	// Allocate memory for the string array
+	char** lines = malloc(sizeof(char *) * 1);
+
+    // Read the file line by line
+    char line[MAX_LINE_LENGTH];
+    int num_lines = 0;
+    while (fgets(line, MAX_LINE_LENGTH, file)) {
+        // Remove the newline character from the end of the line
+        int len = strlen(line);
+        if (len > 0 && line[len - 1] == '\n') {
+            line[len - 1] = '\0';
+        }
+
+    	// Allocate memory for the line and copy it to the string array
+    	lines[num_lines] = (char *) malloc(len + 1);
+    	strcpy(lines[num_lines], line);
+    	num_lines++;
+
+    	// Reallocate memory for the string array
+    	lines = realloc(lines, (num_lines + 1) * sizeof(char *));
+    }
+
+    // Close the file
+    fclose(file);
+
+    // Print the array of strings
+    for (int i = 0; i < num_lines; i += 2) {
+		char *input = lines[i];
+		char *expected = lines[i+1];
+
+		clock_t start = clock();
+		uint8_t sudoku[81] = {0};
+		char output[82] = {0};
+		parse_sudoku(input, sudoku);
+		sudoku_solve(sudoku);
+		sudoku_to_string(sudoku, output);
+		clock_t end = clock();
+		double elapsed_time = 1000 * (end - start) / (double) CLOCKS_PER_SEC;
+		if (strcmp(expected, output) == 0) {
+			printf("Solved sudoku %s in %f ms\n", input, elapsed_time);
+		} else {
+			printf("Failed to solve sudoku %s. Expected %s, got %s\n", input, expected, output);
+		}
+	}
+
 	return 0;
 }
-
-/*
-    sudoku_puzzle = parse_sudoku()
-    start = time.clock()
-    print sudoku_solve(sudoku_puzzle)
-    t = time.clock()-start
-    print t
-    */
