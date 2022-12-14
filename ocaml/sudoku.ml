@@ -1,6 +1,13 @@
 open List
+open String
 
 let explode s = List.init (String.length s) (String.get s)
+
+let lookup (grid: int list list) (row: int) (col: int) : int =
+  List.nth (List.nth grid row) col
+
+let cartesian l l' = 
+  List.concat (List.map (fun e -> List.map (fun e' -> (e,e')) l') l)
 
 let range start end_ =
   let rec range_ acc i =
@@ -9,60 +16,35 @@ let range start end_ =
   in
   List.rev (range_ [] start)
 
-let string_to_puzzle input =
-  let nums = List.map (fun c ->
-    if c = '.' then 0
-    else int_of_string (String.make 1 c)
-  ) (explode input) in
-  List.map (fun i ->
-    List.map (fun j ->
-      List.nth nums (i*9+j)) (range 0 9)) (range 0 9)
+let string_to_puzzle (input: string) : int array =
+  Array.init (String.length input) (fun i ->
+    let c = String.get input i in
+    if c != '.' then int_of_char c else 0
+  )
+
+let puzzle_to_string (puzzle: int array) : string =
+  let string_list = Array.map (fun e -> if e != 0 then string_of_int e else ".") puzzle in
+  Array.fold_left (fun acc s -> acc ^ s) "" string_list
 
 let is_valid_row (row: int list) : bool =
   let checkset = Array.make 10 0 in
   List.iter (fun e -> checkset.(e) <- checkset.(e) + 1) row;
-  List.for_all (fun e -> e <= 1) (Array.to_list (Array.sub checkset 1 9))
+  Array.for_all (fun e -> e <= 1) (Array.sub checkset 1 9)
 
+let is_valid grid =
+  let rows = List.init 9 (fun r -> List.init 9 (fun c -> grid.(r * 9 + c))) in
+  let cols = List.init 9 (fun c -> List.init 9 (fun r -> grid.(r * 9 + c))) in
+  let boxs = List.init 9 (fun i ->
+    let row = (i / 3) * 3 in
+    let col = (i mod 3) * 3 in
+    List.flatten (List.init 3 (fun r -> List.init 3 (fun c -> grid.((row+r)*9+(col+c)))))
+  ) in
+  List.for_all is_valid_row rows && List.for_all is_valid_row cols && List.for_all is_valid_row boxs
 
-let lookup (grid: int list list) (row: int) (col: int) : int =
-  List.nth (List.nth grid row) col
-
-let check_boxes grid =
-  let indices =
-    map (fun x ->
-      List.combine (range ((x / 3) * 3) ((x / 3) * 3 + 3)) (range ((x mod 3) * 3) ((x mod 3) * 3 + 3))
-    ) (range 0 9)
-  in
-  let boxes =
-    map (fun index ->
-      List.map (fun (r, c) -> lookup grid r c) index
-    ) indices
-  in
-  List.for_all is_valid_row boxes
-
-
-let is_valid (grid: int list list) : bool =
-  (* check rows *)
-  if List.exists (fun r -> not (is_valid_row (List.nth grid r))) (range 0 9) then
-    false
-  else
-    (* check cols *)
-    let transposed = List.map (fun col -> List.map (fun row -> List.nth row col) grid) (range 0 9) in
-    if List.exists (fun c -> not (is_valid_row (List.nth transposed c))) (range 0 9) then
-      false
-    else
-      (* check boxes *)
-      check_boxes grid
-
-let cartesian l l' = 
-  List.concat (List.map (fun e -> List.map (fun e' -> (e,e')) l') l)
-
-let next_open (grid: int list list) =
-  let indices = cartesian (range 0 9) (range 0 9) in
-  let opened = List.filter (fun (x, y) -> (lookup grid x y) = 0) indices in
-  match opened with
-  | hd :: _ -> Some hd
-  | _ -> None
+let next_open grid =
+  let yyy = Array.to_list (Array.mapi (fun i x -> (i, x = 0)) grid) in
+  let zzz = List.filter (fun (i, x) -> x) yyy in
+  zzz.hd
 
 (* Print every two lines together *)
 let rec print_pairs = function

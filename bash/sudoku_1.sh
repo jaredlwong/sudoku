@@ -1,29 +1,16 @@
 #!/bin/bash
 
-input=''
-output=''
-grid=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-
 function string_to_puzzle() {
-  local i
+    local input=$1
+    local result=""
     for (( i=0; i<${#input}; i++ )); do
         if [[ ${input:$i:1} == "." ]]; then
-          grid[i]=0
+            result+="0"
         else
-          grid[i]=$((${input:$i:1})) 
+            result+="${input:$i:1}"
         fi
     done
-}
-
-function puzzle_to_string() {
-    output=''
-    for e in "${grid[@]}"; do
-      if [[ $e == 0 ]]; then
-        output+="."
-      else
-        output+="$e"
-      fi
-    done
+    echo -n "${result}"
 }
 
 function is_valid_row() {
@@ -53,6 +40,8 @@ function is_valid_row() {
 }
 
 function is_valid() {
+  local grid="$1"
+
   for r in $(seq 0 8); do
     local row=""
     for c in $(seq 0 8); do
@@ -73,7 +62,6 @@ function is_valid() {
     fi
   done
 
-  local i
   for i in $(seq 0 8); do
     local box_row=$((i / 3))
     local box_col=$((i % 3))
@@ -91,48 +79,46 @@ function is_valid() {
   return 0
 }
 
-next_open_return=0
 function next_open() {
-    next_open_return=-1
+    local grid=$1
     for ((r=0; r<9; r++)); do
         for ((c=0; c<9; c++)); do
-            echo "--- $r $c"
-            echo "${grid:$((r*9+c)):1}"
-            echo "---"
             if [[ ${grid:$((r*9+c)):1} == 0 ]]; then
-                next_open_return=$((r*9+c))
+                echo $((r*9+c))
                 return
             fi
         done
     done
+    echo -1
 }
 
-solve_return=1
 function solve() {
-    solve_return=1
+    local grid="$1"
+
     # Check if grid is valid
-    if ! is_valid; then
-        return
+    if ! is_valid "$grid"; then
+        return 1
     fi
 
-    next_open
-    p=$next_open_return
 
     # Get next open position in grid
-    if [ $p -lt 0 ]; then
-        solve_return=0
-        return
+    local p=$(next_open "$grid")
+    if [ "$p" -lt 0 ]; then
+        echo "$grid"
+        return 0
     fi
 
     # Try values from 1 to 9 at the open position
     for ((v=1; v<=9; v++)); do
-        grid[$p]=$v
-        solve
-        if [ $solve_return -eq 0 ]; then
-            return
+        grid[p]="$v"
+        result=$(solve "${1:0:$p}$v${1:$p+1}")
+        if [ -n "$result" ]; then
+            echo "$result"
+            return 0
         fi
-        grid[$p]=0
     done
+
+    return 1
 }
 
 
@@ -163,20 +149,15 @@ done < $filename
 for (( i=0; i<${#lines[@]} ; i+=2 )) ; do
   input="${lines[i]}"
   expected="${lines[i+1]}"
+
   start=$(date +%s)
-  string_to_puzzle
-  puzzle_to_string
-  solve
-  puzzle_to_string
-  echo "$input $expected $output"
-  # end=$(date +%s)
-  # elapsed=$((end - start))
-
-  # echo "$input $expected $output $grid"
-
-  # if [ "$output" == "$expected" ]; then
-  #   echo "Solved sudoku $input in $elapsed s"
-  # else
-  #   echo "Failed to solve sudoku $input. Expected $expected, got $output"
-  # fi
+  grid=$(string_to_puzzle "$input")
+  output=$(solve "$grid")
+  end=$(date +%s)
+  elapsed=$((end - start))
+  if [ "$output" == "$expected" ]; then
+    echo "Solved sudoku $input in $elapsed s"
+  else
+    echo "Failed to solve sudoku $input. Expected $expected, got $output"
+  fi
 done

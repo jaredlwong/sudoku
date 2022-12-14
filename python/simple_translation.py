@@ -1,8 +1,110 @@
 import sys
 import time
 from functools import reduce
+from itertools import product
 
 from typing import List
+
+################################################################################
+# imperative
+
+def string_to_puzzle(input: str) -> List[int]:
+    return map(lambda c: int(c) if c != '.' else 0, input)
+
+def puzzle_to_string(puzzle: List[int]) -> str:
+    return map(lambda e: str(e) if e != 0 else '.', puzzle)
+
+def is_valid_row(row: List[int]) -> bool:
+    checkset: List[int] = [0] * 10
+    for e in row:
+        checkset[e] += 1
+    return all(e <= 1 for e in checkset[1:])
+
+def is_valid(grid: List[int]) -> bool:
+    for r in range(9):
+        row = [grid[r*9+c] for c in range(9)]
+        if not is_valid_row(row):
+            return False
+    for c in range(9):
+        col = [grid[r*9+c] for r in range(9)]
+        if not is_valid_row(col):
+            return False
+    for i in range(9):
+        box_row = i // 3
+        box_col = i % 3
+        box = [
+            grid[r*9+c]
+            for r in range(box_row * 3, box_row * 3 + 3)
+            for c in range(box_col * 3, box_col * 3 + 3)
+        ]
+        if not is_valid_row(box):
+            return False
+
+def next_open(grid: List[int]):
+    for i in range(81):
+        if grid[i] == 0:
+            return i
+    return None
+
+def solve(grid: List[int]):
+    if not is_valid(grid):
+        return None
+    p = next_open(grid)
+    if p < 0:
+        return grid
+    for v in range(1, 10):
+        grid[p] = v
+        result = solve(grid)
+        if result:
+            return result
+        grid[p] = 0
+    return None
+
+################################################################################
+# functional
+
+def string_to_puzzle(input: str) -> List[int]:
+    return map(lambda c: int(c) if c != '.' else 0, input)
+
+def puzzle_to_string(puzzle: List[int]) -> str:
+    return map(lambda e: str(e) if e != 0 else '.', puzzle)
+
+def is_valid_row(row: List[int]) -> bool:
+    def add_to_checkset(checkset, x):
+        checkset[x] += 1
+        return checkset
+    checkset = reduce(add_to_checkset, row, [0]*10)
+    return all(map(lambda x: x <= 1, checkset[1:]))
+
+def is_valid(grid: List[int]) -> bool:
+    rows = map(lambda r: map(lambda c: grid[r*9+c], range(9)), range(9))
+    cols = map(lambda c: map(lambda r: grid[r*9+c], range(9)), range(9))
+    boxs = map(lambda i: map(lambda r, c: grid[r*9+c],
+                             product(range((i // 3) * 3, (i // 3) * 3 + 3),
+                                     range((i % 3) * 3, (i % 3) * 3 + 3))), range(9))
+    return all(map(is_valid_row, rows)) and all(map(is_valid_row, cols)) and all(map(is_valid_row, boxs))
+
+def next_open(grid: List[int]):
+    xxx = map(lambda x: x == 0, grid)
+    yyy = enumerate(xxx)
+    zzz = filter(lambda i, x: x, yyy)
+    return next(zzz, -1)[0]
+    # return next(filter(lambda i: grid[i] == 0, range(81)), -1)
+
+def solve(grid: List[int]):
+    p = next_open(grid)
+    valid = is_valid(grid)
+    def try_value(v):
+        grid[p] = v
+        return v if solve(grid) else 0
+    if not valid:
+        return False
+    if p < 0:
+        return True
+    grid[p] = next(filter(lambda v: v != 0, map(try_value, range(1, 10))), 0)
+    return grid[p] != 0
+
+################################################################################
 
 def string_to_puzzle(input: str) -> List[List[int]]:
     return [
@@ -14,17 +116,8 @@ def string_to_puzzle(input: str) -> List[List[int]]:
     nums = [int(c) if c != '.' else 0 for c in input]
     return [[nums[i*9+j] for j in range(9)] for i in range(9)]
 
-def string_to_puzzle(input: str) -> List[int]:
-    return [int(c) if c != '.' else 0 for c in input]
-
 def puzzle_to_string(grid: List[List[int]]) -> str:
     return ''.join(''.join(str(e) for e in row) for row in grid)
-
-def is_valid_row(row: List[int]) -> bool:
-    checkset: List[int] = [0] * 10
-    for e in row:
-        checkset[e] += 1
-    return all(e <= 1 for e in checkset[1:])
 
 def is_valid_row(row: str) -> bool:
     checkset: List[int] = [0] * 10
@@ -54,6 +147,7 @@ def is_valid(grid: str) -> bool:
         ]
         if not is_valid_row(box):
             return False
+
 
 def is_valid(grid: List[List[int]]) -> bool:
     # check rows
@@ -112,7 +206,7 @@ def next_open(grid: str) -> int:
             if grid[r*9+c] == 0:
                 return r*9+c
     return None
-    
+
 def solve(grid: str):
     if not is_valid(grid):
         return None
