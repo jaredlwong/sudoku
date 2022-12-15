@@ -1,4 +1,4 @@
-.PHONY: run
+.DEFAULT_GOAL = run
 
 run:
 	tsc sudoku.ts

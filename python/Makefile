@@ -1,4 +1,4 @@
-.PHONY: run
+.DEFAULT_GOAL = run
 
 alt:
 	python go_translation.py ../inputs/only_hard.txt

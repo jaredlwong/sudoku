@@ -1,3 +1,5 @@
+.DEFAULT_GOAL = sudoku_fast
+
 bin:
 	mkdir bin
 

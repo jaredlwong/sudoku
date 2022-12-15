@@ -1,4 +1,4 @@
-.PHONY: run
+.DEFAULT_GOAL = run
 
 run:
 	ghc-9.2 sudoku_simple.hs

@@ -1,4 +1,4 @@
-.PHONY: run
+.DEFAULT_GOAL = run
 
 # lkjsadlkfjlkjdf:
 # 	g++ -std=gnu++11 sudoku.cpp -o sudoku
