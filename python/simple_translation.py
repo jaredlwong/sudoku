@@ -9,36 +9,55 @@ from typing import List
 # imperative
 
 def string_to_puzzle(input: str) -> List[int]:
-    return map(lambda c: int(c) if c != '.' else 0, input)
+    puzzle = []
+    for c in input:
+        if c != '.':
+            puzzle.append(int(c))
+        else:
+            puzzle.append(0)
+    return puzzle
 
 def puzzle_to_string(puzzle: List[int]) -> str:
-    return map(lambda e: str(e) if e != 0 else '.', puzzle)
+    s = []
+    for e in puzzle:
+        if e != 0:
+            s.append(str(e))
+        else:
+            s.append('.')
+    return ''.join(s)
 
 def is_valid_row(row: List[int]) -> bool:
     checkset: List[int] = [0] * 10
     for e in row:
         checkset[e] += 1
-    return all(e <= 1 for e in checkset[1:])
+    for e in checkset[1:]:
+        if e > 1:
+            return False
+    return True
 
 def is_valid(grid: List[int]) -> bool:
     for r in range(9):
-        row = [grid[r*9+c] for c in range(9)]
+        row = []
+        for c in range(9):
+            row.append(grid[r*9+c])
         if not is_valid_row(row):
             return False
     for c in range(9):
-        col = [grid[r*9+c] for r in range(9)]
+        col = []
+        for r in range(9):
+            col.append(grid[r*9+c])
         if not is_valid_row(col):
             return False
     for i in range(9):
         box_row = i // 3
         box_col = i % 3
-        box = [
-            grid[r*9+c]
-            for r in range(box_row * 3, box_row * 3 + 3)
-            for c in range(box_col * 3, box_col * 3 + 3)
-        ]
+        box = []
+        for r in range(box_row * 3, box_row * 3 + 3):
+            for c in range(box_col * 3, box_col * 3 + 3):
+                box.append(grid[r*9+c])
         if not is_valid_row(box):
             return False
+    return True
 
 def next_open(grid: List[int]):
     for i in range(81):
@@ -48,17 +67,16 @@ def next_open(grid: List[int]):
 
 def solve(grid: List[int]):
     if not is_valid(grid):
-        return None
+        return False
     p = next_open(grid)
-    if p < 0:
-        return grid
+    if p is None:
+        return True
     for v in range(1, 10):
         grid[p] = v
-        result = solve(grid)
-        if result:
-            return result
+        if solve(grid):
+            return True
         grid[p] = 0
-    return None
+    return False
 
 ################################################################################
 # functional

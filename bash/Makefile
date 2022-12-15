@@ -1,4 +1,4 @@
 .PHONY: run
 
 run:
-	bash sudoku.sh ../inputs/only_hard.txt
+	bash sudoku_1.sh ../inputs/only_hard.txt

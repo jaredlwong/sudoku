@@ -1,97 +1,110 @@
-convert <- function(input) {
-  grid <- matrix(0, nrow = 9, ncol = 9)
-  for (i in 1:9) {
-    for (j in 1:9) {
-      print((i - 1) * 9 + j)
-      print((i - 1) * 9 + j + 1)
-      val <- substring(input, (i - 1) * 9 + j, (i - 1) * 9 + j + 1)
-      print('--------')
-      print(val)
-      print('--------')
-      if (val != '.') {
-        grid[i, j] <- as.integer(val)
-      }
-    }
+# This function takes in a puzzle string and returns a vector of integers
+# representing the puzzle. It converts "." to 0, and converts all other
+# characters to integers.
+string_to_puzzle <- function(input) {
+  # Split input into individual characters
+  puzzle_chars <- strsplit(input, "")[[1]]
+
+  # Convert each character to an integer, or 0 if it is a "."
+  puzzle <- c()
+  for (x in puzzle_chars) {
+    puzzle <- append(puzzle, if (x == ".") 0 else as.integer(x))
   }
-  grid
+
+  return(puzzle)
 }
 
-puzzle_to_string <- function(grid) {
-  do.call(paste, grid, sep = '')
+# This function takes a puzzle and returns a string representation of the puzzle.
+# If the element is 0, it is represented by a period instead.
+puzzle_to_string <- function(puzzle) {
+  s <- c()
+  for (element in puzzle) {
+    # If the element is 0, set it to ., else set it to the element
+    s <- append(s, if (element != 0) as.character(element) else '.')
+  }
+  return(paste(s, collapse = ''))
+}
+
+# This function takes a row of the sudoku grid as input and returns TRUE if that
+# row is valid (i.e. no duplicate values), and FALSE otherwise.
+is_valid_row <- function(row) {
+    checkset <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    for (e in row) {
+      if (e != 0) {
+        # R is 1-indexed, so we don't need to subtract 1 from e
+        checkset[e] <- checkset[e] + 1
+      }
+    }
+    for (e in checkset) {
+        if (e > 1) {
+            return(FALSE)
+        }
+    }
+    return(TRUE)
 }
 
 is_valid <- function(grid) {
-  # check rows
   for (r in 1:9) {
-    checkset <- rep(0, 10)
+    row <- c()
     for (c in 1:9) {
-      checkset[grid[r,c]] <- checkset[grid[r,c]] + 1
-      if (grid[r,c] > 0 && checkset[grid[r,c]] > 1) {
-        return(FALSE)
-      }
+      row <- append(row, grid[(r-1)*9+c])
+    }
+    if (!is_valid_row(row)) {
+      return(FALSE)
     }
   }
-
-  # check cols
   for (c in 1:9) {
-    checkset <- rep(0, 10)
+    col <- c()
     for (r in 1:9) {
-      checkset[grid[r,c]] <- checkset[grid[r,c]] + 1
-      if (grid[r,c] > 0 && checkset[grid[r,c]] > 1) {
-        return(FALSE)
-      }
+      col <- append(col, grid[(r-1)*9+c])
+    }
+    if (!is_valid_row(col)) {
+      return(FALSE)
     }
   }
-
-  # check boxes
-  for (x in 1:9) {
-    checkset <- rep(0, 10)
-    box_row <- x %/% 3
-    box_col <- x %% 3
-    for (r in box_row * 3:box_row * 3 + 3) {
-      for (c in box_col * 3:box_col * 3 + 3) {
-        checkset[grid[r,c]] <- checkset[grid[r,c]] + 1
-        if (grid[r,c] > 0 && checkset[grid[r,c]] > 1) {
-          return(FALSE)
-        }
+  for (i in 1:9) {
+    box_row <- floor((i-1)/3)
+    box_col <- (i-1)%%3
+    box <- c()
+    for (r in (1:3) + box_row * 3) {
+      for (c in (1:3) + box_col * 3) {
+        box <- append(box, grid[(r-1)*9+c])
       }
     }
+    if (!is_valid_row(box)) {
+      return(FALSE)
+    }
   }
-
   return(TRUE)
 }
 
 next_open <- function(grid) {
-  for (r in 1:9) {
-    for (c in 1:9) {
-      if (grid[r, c] == 0) {
-        return (c(r, c))
-      }
+  for (i in 1:81) {
+    if (grid[i] == 0) {
+      return(i)
     }
   }
-  return (None)
+  return(NULL)
 }
 
-solve <- function(grid){
-  if(!is_valid(grid)){
-    return(F)
+solve <- function(grid) {
+  valid <- is_valid(grid)
+  if (!valid) {
+    return(NULL)
   }
   p <- next_open(grid)
-  # if complete
-  if(!p){
-    return(T)
+  if (is.null(p)) {
+    return(grid)
   }
-  row <- p[1]
-  col <- p[2]
-  for(v in 1:10){
-    grid[row][col] <- v
-    result <- solve(grid)
-    if(result){
-      return(T)
+  for (v in 1:9) {
+    grid[p] <- v
+    next_grid <- solve(grid)
+    if (!is.null(next_grid)) {
+      return(next_grid)
     }
-    grid[row][col] <- 0
+    grid[p] <- 0
   }
-  return(F)
+  return(NULL)
 }
 
 args <- commandArgs(trailingOnly=TRUE)
@@ -107,22 +120,19 @@ lines <- readLines(filename)
 # Strip the whitespace from each line and remove any empty lines
 lines <- trimws(lines)
 lines <- lines[lines != ""]
-print(length(lines))
 
-for (i in seq(0, length(lines), 2)) {
-  input = lines[i]
-  expected = lines[i+1]
-  print(input)
-  print(expected)
-  s = convert(input)
-  # start = time.time()
-  # solve(s)
-  # print(s)
-  # end = time.time()
-  # if (puzzle_to_string(s) == expected) {
-  #   print("Solved sudoku %s in %d ms" % (input, (end-start)*1000))
-  # } else {
-  #   print("Failed to solve sudoku %s. Expected %s, got %s" % (input, expected, s))
-  #   exit(1)
-  # }
+for (i in seq(1, length(lines), 2)) {
+  input <- lines[i]
+  expected <- lines[i+1]
+  start <- Sys.time()
+  s <- string_to_puzzle(input)
+  solved <- solve(s)
+  output <- puzzle_to_string(solved)
+  end <- Sys.time()
+  if (output == expected) {
+    print(paste("Solved sudoku ", input, " in ", (end-start)*1000, " ms"))
+  } else {
+    print(paste("Failed to solve sudoku ", input, ". Expected ", expected, ", got ", output))
+    stop("Failed to solve sudoku")
+  }
 }

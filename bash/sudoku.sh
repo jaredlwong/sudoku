@@ -15,7 +15,13 @@ function string_to_puzzle() {
     done
 }
 
+function print_puzzle() {
+  puzzle_to_string
+  echo "$output"
+}
+
 function puzzle_to_string() {
+    local e
     output=''
     for e in "${grid[@]}"; do
       if [[ $e == 0 ]]; then
@@ -52,24 +58,28 @@ function is_valid_row() {
     return 0
 }
 
+is_valid_return=1
 function is_valid() {
+  is_valid_return=1
+  local r
+  local c
   for r in $(seq 0 8); do
     local row=""
     for c in $(seq 0 8); do
-      row+="${grid:$((r * 9 + c)):1}"
+      row+="${grid[$((r * 9 + c))]}"
     done
     if ! is_valid_row "$row"; then
-      return 1
+      return
     fi
   done
 
   for c in $(seq 0 8); do
     local col=""
     for r in $(seq 0 8); do
-      col+="${grid:$((r * 9 + c)):1}"
+      col+="${grid[$((r * 9 + c))]}"
     done
     if ! is_valid_row "$col"; then
-      return 1
+      return
     fi
   done
 
@@ -80,26 +90,34 @@ function is_valid() {
     local box=""
     for r in $(seq $((box_row * 3)) $((box_row * 3 + 2))); do
       for c in $(seq $((box_col * 3)) $((box_col * 3 + 2))); do
-        box+="${grid:$((r * 9 + c)):1}"
+        box+="${grid[$((r * 9 + c))]}"
       done
     done
     if ! is_valid_row "$box"; then
-      return 1
+      return
     fi
   done
 
-  return 0
+  is_valid_return=0
+  return
 }
 
 next_open_return=0
 function next_open() {
     next_open_return=-1
+    local r
+    local c
     for ((r=0; r<9; r++)); do
         for ((c=0; c<9; c++)); do
-            echo "--- $r $c"
-            echo "${grid:$((r*9+c)):1}"
-            echo "---"
-            if [[ ${grid:$((r*9+c)):1} == 0 ]]; then
+            # echo "--- $r $c $((r*9+c))"
+            # s=$((r*9+c))
+            # v=${grid[$s]}
+            # echo $v
+
+            # echo "${grid:$((r*9+c)):1}"
+            # echo "---"
+            # if [[ ${grid:$((r*9+c)):1} == 0 ]]; then
+            if [[ ${grid[$((r*9+c))]} == 0 ]]; then
                 next_open_return=$((r*9+c))
                 return
             fi
@@ -111,28 +129,34 @@ solve_return=1
 function solve() {
     solve_return=1
     # Check if grid is valid
-    if ! is_valid; then
+    is_valid
+    if [ $is_valid_return -eq 1 ]; then
+        solve_return=1
         return
     fi
 
     next_open
-    p=$next_open_return
+    local p=$next_open_return
 
     # Get next open position in grid
     if [ $p -lt 0 ]; then
-        solve_return=0
+        solve_return=1
         return
     fi
 
+    print_puzzle
     # Try values from 1 to 9 at the open position
+    local v
     for ((v=1; v<=9; v++)); do
         grid[$p]=$v
         solve
         if [ $solve_return -eq 0 ]; then
+            solve_return=0
             return
         fi
         grid[$p]=0
     done
+    solve_return=1
 }
 
 
