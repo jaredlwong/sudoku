@@ -37,24 +37,26 @@ def is_valid_row(row: List[int]) -> bool:
 
 def is_valid(grid: List[int]) -> bool:
     for r in range(9):
-        row = []
+        row = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         for c in range(9):
-            row.append(grid[r*9+c])
+            row[c] = grid[r*9+c]
         if not is_valid_row(row):
             return False
     for c in range(9):
-        col = []
+        col = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         for r in range(9):
-            col.append(grid[r*9+c])
+            col[r] = grid[r*9+c]
         if not is_valid_row(col):
             return False
     for i in range(9):
         box_row = i // 3
         box_col = i % 3
-        box = []
+        box = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        k = 0
         for r in range(box_row * 3, box_row * 3 + 3):
             for c in range(box_col * 3, box_col * 3 + 3):
-                box.append(grid[r*9+c])
+                box[k] = grid[r*9+c]
+                k += 1
         if not is_valid_row(box):
             return False
     return True
@@ -63,13 +65,13 @@ def next_open(grid: List[int]):
     for i in range(81):
         if grid[i] == 0:
             return i
-    return None
+    return -1
 
 def solve(grid: List[int]):
     if not is_valid(grid):
         return False
     p = next_open(grid)
-    if p is None:
+    if p < 0:
         return True
     for v in range(1, 10):
         grid[p] = v
