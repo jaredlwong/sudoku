@@ -1,6 +1,10 @@
 #include "string.h"
 #include "stdio.h"
 
+/*
+ * i don't think i ever got anywhere with this version, it's supposed to be 'optimized'
+ */
+
 typedef unsigned char uint8_t;
 
 #define BOARD_GET(BOARD, R, C) ((BOARD)[(R)*9+(C)])

@@ -1,6 +1,11 @@
 #include "string.h"
 #include "stdio.h"
 
+/*
+ * This experiment was an attempt to make it parallel, but it didn't go
+ * anywhere. 
+ */
+
 typedef unsigned char board_t[81];
 
 #define BOARD_GET(BOARD, R, C) ((BOARD)[(R)*9+(C)])

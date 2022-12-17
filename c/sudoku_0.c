@@ -3,6 +3,12 @@
 #include <string.h>
 #include <time.h>
 
+/*
+ * this is a fast sudoku solver. it is my reference implementation for other
+ * fast solvers. the main improvement is doing some complicated scheme to keep
+ * track of the valid states.
+ */
+
 typedef unsigned char uint8_t;
 
 #define GET(ARRAY, I, J) ((ARRAY)[(I)*9+(J)])
@@ -11,7 +17,7 @@ typedef unsigned char uint8_t;
 #define INDEX2J(INDEX) ((INDEX)%9)
 #define IJ2INDEX(I, J) (((I)/3)*3+((J)/3))
 
-void parse_sudoku(char *str_rep, uint8_t *sudoku) {
+void parse_sudoku(char *str_rep, unsigned char* sudoku) {
 	int i;
 	for (i = 0; i < 81; ++i) {
 		if (str_rep[i] == '.') {
