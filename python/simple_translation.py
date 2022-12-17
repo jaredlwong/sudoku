@@ -113,18 +113,21 @@ def next_open(grid: List[int]):
     return next(zzz, -1)[0]
     # return next(filter(lambda i: grid[i] == 0, range(81)), -1)
 
-def solve(grid: List[int]):
-    p = next_open(grid)
-    valid = is_valid(grid)
-    def try_value(v):
-        grid[p] = v
-        return v if solve(grid) else 0
-    if not valid:
+def solve(grid: List[int]) -> bool:
+    if not is_valid(grid):
         return False
+    p = next_open(grid)
     if p < 0:
         return True
-    grid[p] = next(filter(lambda v: v != 0, map(try_value, range(1, 10))), 0)
-    return grid[p] != 0
+    def try_value(v):
+        if v == 10:
+            return False
+        grid[p] = v
+        if solve(grid):
+            return True
+        grid[p] = 0
+        return try_value(v+1)
+    return try_value(1)
 
 ################################################################################
 

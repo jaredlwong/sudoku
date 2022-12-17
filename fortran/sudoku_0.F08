@@ -1,8 +1,8 @@
-#define GET(ARRAY, I, J) (ARRAY((I)*9+(J)))
-#define SET(ARRAY, I, J, V) ARRAY((I)*9+(J)) = (V)
+#define GET(ARRAY, I, J) (ARRAY((I)*9+(J)+1))
+#define SET(ARRAY, I, J, V) ARRAY((I)*9+(J)+1) = (V)
 #define INDEX2I(INDEX) ((INDEX)/9)
 #define INDEX2J(INDEX) ((INDEX)%9)
-#define IJ2INDEX(I, J) (((I)/3)*3+((J)/3))
+#define IJ2INDEX(I, J) (((I)/3)*3+((J)/3)+1)
 
 ! convert . to 0, and every other character to its integer value
 subroutine sudoku_chars_to_ints(sudoku)
@@ -31,31 +31,115 @@ subroutine sudoku_ints_to_chars(sudoku)
 end subroutine
 
 ! return number of constants in array
-integer function sudoku_constants(board, constants)
+function sudoku_constants(board, constants) result(c)
   character, dimension(81), intent(in) :: board(81)
   character, dimension(81), intent(out) :: constants(81)
-  integer :: i = 1, c = 1
+  integer :: i = 1, c
+  c = 0
   do i = 1, 81
     if (board(i) == achar(0)) then
       constants(c) = achar(i)
       c = c + 1
     end if
   end do
-  sudoku_constants = c
 end function
 
 subroutine sudoku_rows(sudoku, rows)
   character, dimension(81), intent(in) :: sudoku
   character, dimension(81), intent(out) :: rows
   integer :: i, j
-  do i = 1, 9
-    do j = 1, 9
+  do i = 0, 8
+    do j = 0, 8
       if (GET(sudoku, i, j) > achar(0)) then
         SET(rows, i, ichar(GET(sudoku, i, j))-1, achar(1))
       end if
     end do
   end do
 end subroutine sudoku_rows
+
+subroutine sudoku_cols(sudoku, cols)
+  character, dimension(81), intent(in) :: sudoku
+  character, dimension(81), intent(out) :: cols
+  integer :: i, j
+  do i = 0, 8
+    do j = 0, 8
+      if (GET(sudoku, j, i) > achar(0)) then
+        SET(cols, i, ichar(GET(sudoku, j, i))-1, achar(1))
+      end if
+    end do
+  end do
+end subroutine sudoku_cols
+
+subroutine sudoku_sqrs(sudoku, sqrs)
+  character, dimension(81), intent(in) :: sudoku
+  character, dimension(81), intent(out) :: sqrs
+  integer :: i, j, k, l
+  do i = 0, 2
+    do j = 0, 2
+      do k = i*3, i*3+2
+        do l = j*3, j*3+2
+          if (GET(sudoku, k, l) > achar(0)) then
+            SET(sqrs, IJ2INDEX(k, l), ichar(GET(sudoku, k, l))-1, achar(1))
+          end if
+        end do
+      end do
+    end do
+  end do
+end subroutine sudoku_sqrs
+
+subroutine sudoku_solve(sudoku)
+  character, dimension(81) :: sudoku
+  character, dimension(81) :: constants
+  character, dimension(81) :: rows, cols, sqrs
+  integer :: num_consts
+  integer :: sudoku_constants
+  integer :: cur_const, i, j, k
+
+  num_consts = sudoku_constants(sudoku, constants)
+
+  call sudoku_rows(sudoku, rows)
+  call sudoku_cols(sudoku, cols)
+  call sudoku_sqrs(sudoku, sqrs)
+
+  ! do
+  !   if (sudoku[constants[num_consts-1]] /= 0) then
+  !     return 1
+  !   endif
+  !   i = INDEX2I(constants[cur_const])
+  !   j = INDEX2J(constants[cur_const])
+  !   SET(sudoku, i, j, 1)
+  !   do
+  !     if (GET(rows, i, GET(sudoku, i, j)-1) .or.
+  !         GET(cols, j, GET(sudoku, i, j)-1) .or.
+  !         GET(sqrs, IJ2INDEX(i, j), GET(sudoku, i, j)-1)) then
+  !       if (GET(sudoku, i, j) == 9) then
+  !         SET(sudoku, i, j, 0)
+  !         cur_const = cur_const - 1
+  !         i = INDEX2I(constants[cur_const])
+  !         j = INDEX2J(constants[cur_const])
+  !         do
+  !           SET(rows, i, GET(sudoku, i, j)-1, 0)
+  !           SET(cols, j, GET(sudoku, i, j)-1, 0)
+  !           SET(sqrs, IJ2INDEX(i,j), GET(sudoku, i, j)-1, 0)
+  !           SET(sudoku, i, j, 0)
+  !           cur_const = cur_const - 1
+  !           i = INDEX2I(constants[cur_const])
+  !           j = INDEX2J(constants[cur_const])
+  !           if (GET(sudoku, i, j) /= 9) exit
+  !         enddo
+  !         SET(rows, i, GET(sudoku, i, j)-1, 0)
+  !         SET(cols, j, GET(sudoku, i, j)-1, 0)
+  !         SET(sqrs, IJ2INDEX(i,j), GET(sudoku, i, j)-1, 0)
+  !       endif
+  !       SET(sudoku, i, j, GET(sudoku, i, j)+1)
+  !     endif
+  !   enddo
+  !   SET(rows, i, GET(sudoku, i, j)-1, 1)
+  !   SET(cols, j, GET(sudoku, i, j)-1, 1)
+  !   SET(sqrs, IJ2INDEX(i,j), GET(sudoku, i, j)-1, 1)
+  !   cur_const = cur_const + 1
+  ! enddo
+end subroutine
 
 program read_file
   implicit none
@@ -64,7 +148,7 @@ program read_file
   character(len=256), allocatable :: lines(:)
 
   ! Declare an integer variable to store the number of lines in the file
-  integer :: num_lines = 0, len = 0, i = 0, iostat = 0
+  integer :: num_lines = 0, i = 0, iostat = 0
 
   character(len=256) :: line, line2, filename, error_msg
   character(len=81) :: input, sudoku, expected
@@ -119,6 +203,7 @@ program read_file
 
       write(*,*) trim(input)
       call sudoku_chars_to_ints(sudoku)
+      call sudoku_solve(sudoku)
       call sudoku_ints_to_chars(sudoku)
       write(*,*) trim(sudoku)
       write(*,*) trim(expected)
