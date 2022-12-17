@@ -61,19 +61,21 @@ def is_valid(grid: List[int]) -> bool:
             return False
     return True
 
-def next_open(grid: List[int]):
+def next_open(grid: List[int]) -> int:
     for i in range(81):
         if grid[i] == 0:
             return i
     return -1
 
-def solve(grid: List[int]):
+def solve(grid: List[int]) -> bool:
     if not is_valid(grid):
         return False
     p = next_open(grid)
     if p < 0:
         return True
-    for v in range(1, 10):
+    for v in range(10):
+        if v == 0:
+            continue
         grid[p] = v
         if solve(grid):
             return True
@@ -271,27 +273,40 @@ def solve(grid):
         grid[row][col] = 0
     return None
 
-if __name__ == '__main__':
+def read_filename() -> str:
     if len(sys.argv) < 2:
         print("Please provide the name of an input file as an argument.")
         exit(1)
-
-    filename = sys.argv[1]
-
+    return sys.argv[1]
+    
+def read_file(filename: str) -> list[str]:
+    lines = []
     with open(filename) as f:
-        lines = [line.strip() for line in f.readlines() if line.strip()]
-        for i in range(0, len(lines), 2):
-            input = lines[i]
-            expected = lines[i+1]
-            s = string_to_puzzle(input)
-            start = time.time()
-            solve(s)
-            end = time.time()
-            if puzzle_to_string(s) == expected:
-                print("Solved sudoku %s in %d ms" % (input, (end-start)*1000))
-            else:
-                print("Failed to solve sudoku %s. Expected %s, got %s" % (input, expected, s))
-                exit(1)
+        for line in f.readlines():
+            cleaned = line.strip()
+            if cleaned != '':
+                lines.append(cleaned)
+    return lines
+
+def solve(lines: List[str]):
+    for i in range(0, len(lines), 2):
+        input = lines[i]
+        expected = lines[i+1]
+        s = string_to_puzzle(input)
+        start = time.time()
+        solve(s)
+        end = time.time()
+        if puzzle_to_string(s) == expected:
+            print("Solved sudoku %s in %d ms" % (input, (end-start)*1000))
+        else:
+            print("Failed to solve sudoku %s. Expected %s, got %s" % (input, expected, s))
+            exit(1)
+
+if __name__ == '__main__':
+    filename = read_filename()
+    lines = read_file(filename)
+    solve(lines)
+
 
                 
 def test(input: List[str]):

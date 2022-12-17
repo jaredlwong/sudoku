@@ -1,4 +1,6 @@
-java:
+.DEFAULT_GOAL: run
+
+run:
 	javac -Xlint:unchecked Sudoku.java
-	time java Sudoku
+	java Sudoku ../inputs/only_hard.txt
 
