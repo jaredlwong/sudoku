@@ -107,12 +107,12 @@ let () =
       let duration = (finish_time -. start_time) *. 1000.0 in
       if result && expected = output then
         begin
-			    Printf.printf "Solved sudoku %s in %f ms\n" input duration;
+          Printf.printf "Solved sudoku %s in %f ms\n" input duration;
           flush stdout
         end
       else
         begin
-			    Printf.printf "Failed to solve sudoku %s. Expected %s, got %s\n" input expected output;
+          Printf.printf "Failed to solve sudoku %s. Expected %s, got %s\n" input expected output;
           flush stdout
         end
     done
