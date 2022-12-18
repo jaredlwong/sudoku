@@ -11,6 +11,7 @@ go: done
 haskell: done
 java: done
 javascript: done
+kotlin: done
 objective-c: done
 ocaml: done
 r: done
@@ -19,12 +20,11 @@ rust: done
 swift: done
 typescript: done
 
-elixir: todo
+elixir: in progress
 erlang: todo
 j: todo
-kotlin: in progress
 lua: in progress
 prolog: todo
 python: need to clean up
-scheme: todo
+scheme: in progress
 zig: todo

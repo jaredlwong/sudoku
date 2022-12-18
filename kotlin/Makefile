@@ -1,3 +1,5 @@
-sudoku:
+.DEFAULT_GOAL: run
+
+run:
 	kotlinc sudoku.kt
-	time kotlin SudokuKt
+	kotlin SudokuKt ../inputs/only_hard.txt

@@ -92,10 +92,12 @@ def puzzle_to_string(puzzle: List[int]) -> str:
     return map(lambda e: str(e) if e != 0 else '.', puzzle)
 
 def is_valid_row(row: List[int]) -> bool:
-    def add_to_checkset(checkset, x):
-        checkset[x] += 1
-        return checkset
-    checkset = reduce(add_to_checkset, row, [0]*10)
+    def add_to_checkset(checkset, i):
+        if i == 10:
+            return checkset
+        checkset[row[i]] += 1
+        return add_to_checkset(checkset, i+1)
+    checkset = add_to_checkset([0]*10, 0)
     return all(map(lambda x: x <= 1, checkset[1:]))
 
 def is_valid(grid: List[int]) -> bool:
@@ -107,27 +109,30 @@ def is_valid(grid: List[int]) -> bool:
     return all(map(is_valid_row, rows)) and all(map(is_valid_row, cols)) and all(map(is_valid_row, boxs))
 
 def next_open(grid: List[int]):
-    xxx = map(lambda x: x == 0, grid)
-    yyy = enumerate(xxx)
-    zzz = filter(lambda i, x: x, yyy)
-    return next(zzz, -1)[0]
-    # return next(filter(lambda i: grid[i] == 0, range(81)), -1)
+    def f(i):
+        if i == 81:
+            return -1
+        if grid[i] == 0:
+            return i
+        return f(i+1)
+    return f(grid)
 
 def solve(grid: List[int]) -> bool:
     if not is_valid(grid):
         return False
-    p = next_open(grid)
-    if p < 0:
-        return True
-    def try_value(v):
-        if v == 10:
-            return False
-        grid[p] = v
-        if solve(grid):
+    def try_find_next(p):
+        if p < 0:
             return True
-        grid[p] = 0
-        return try_value(v+1)
-    return try_value(1)
+        def try_value(v):
+            if v == 10:
+                return False
+            grid[p] = v
+            if solve(grid):
+                return True
+            grid[p] = 0
+            return try_value(v+1)
+        return try_value(1)
+    return try_find_next(next_open(grid))
 
 ################################################################################
 
