@@ -18,7 +18,6 @@ ruby: done
 rust: done
 swift: done
 typescript: done
-zig: todo
 
 elixir: todo
 erlang: todo
@@ -28,3 +27,4 @@ lua: in progress
 prolog: todo
 python: need to clean up
 scheme: todo
+zig: todo
